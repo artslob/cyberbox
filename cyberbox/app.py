@@ -2,7 +2,7 @@ import os
 
 from flask import Flask
 
-from .models import Session, User, init_db
+from cyberbox.models import Session, User, init_db
 
 
 def create_app(testing_config: dict = None):
