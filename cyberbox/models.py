@@ -17,9 +17,7 @@ Base.query = Session.query_property()
 
 
 def init_db(app: Flask = current_app):
-    engine = create_engine(
-        "postgresql+psycopg2://devuser:devpass@localhost:5432/cyberbox-db"
-    )
+    engine = create_engine("postgresql+psycopg2://devuser:devpass@localhost:5432/cyberbox-db")
     Session.configure(bind=engine)
 
     Base.metadata.drop_all(engine)
