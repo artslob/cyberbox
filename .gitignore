@@ -1,5 +1,15 @@
 .python-version
-*.egg-info/
+.idea
+
 *.pyc
 __pycache__/
-.idea
+
+instance/
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+dist/
+build/
+*.egg-info/
