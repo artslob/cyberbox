@@ -1,9 +1,8 @@
 import os
 
 from flask import Flask
-from sqlalchemy import create_engine
 
-from .models import init_app, Session, User, init_db
+from .models import Session, User, init_db
 
 
 def create_app(testing_config: dict = None):
@@ -24,11 +23,6 @@ def create_app(testing_config: dict = None):
         print([f"{user.uuid} {type(user.uuid)}" for user in User.query.all()])
         return "Hello world!"
 
-    engine = create_engine(
-        "postgresql+psycopg2://devuser:devpass@localhost:5432/cyberbox-db"
-    )
-    init_db(engine)
-    Session.configure(bind=engine)
-    init_app(app)
+    init_db(app)
 
     return app
