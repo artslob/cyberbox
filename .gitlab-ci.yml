@@ -14,3 +14,11 @@ before_script:
 tests:
   script:
     - pytest
+
+black:
+  script:
+    - black --check .
+
+isort:
+  script:
+    - isort -rc --check-only .
