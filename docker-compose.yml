@@ -5,7 +5,7 @@ services:
   db:
     image: 'postgres:12.2'
     ports:
-    - '5432:5432'
+      - '5432:5432'
     environment:
       POSTGRES_PASSWORD: devpass
       POSTGRES_USER: devuser
