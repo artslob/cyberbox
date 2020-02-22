@@ -20,7 +20,9 @@ To install package locally firstly you need to install these:
     # in project root
     pyenv install 3.7.4
     pyenv virtualenv 3.7.4 cyberbox
+    # in project root dir:
     pyenv local cyberbox
+    # now virtualenv cyberbox should be active
     poetry install
 
 If you had active virtualenv while running ``poetry install`` one of following commands
@@ -30,6 +32,10 @@ should work:
 
     poetry run uvicorn --version
     uvicorn --version
+
+So if first command is working and second is not, it means you should prepend all commands with
+``poetry run``. That`s why I suggested a way to install packages to local virtualenv so there is
+no need to call ``poetry run`` every time.
 
 ***************
 Running backend
