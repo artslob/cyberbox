@@ -52,6 +52,12 @@ Notes
 *****
 
 #. To view ``.rst`` format use `restview <https://mg.pov.lt/restview/>`_.
+
+.. code-block:: bash
+
+    # runs restview in background without creating nohup.out file
+    nohup restview README.rst > /dev/null 2>&1 &
+
 #. Use following symbols to create headings:
 
    * H1 - Part - ``#`` with overline
