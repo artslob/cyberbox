@@ -28,8 +28,8 @@ should work:
 
 .. code-block:: bash
 
-    poetry run flask --version
-    flask --version
+    poetry run uvicorn --version
+    uvicorn --version
 
 ***************
 Running backend
@@ -37,10 +37,9 @@ Running backend
 
 .. code-block:: bash
 
-    export FLASK_APP="cyberbox.app:create_app"
-    export FLASK_ENV="development"
-    export FLASK_DEBUG="1"
-    flask run
+    uvicorn 'cyberbox.asgi:app' --reload
+
+Then go to http://127.0.0.1:8000.
 
 *****
 Notes

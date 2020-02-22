@@ -1,22 +1,13 @@
-from fastapi import FastAPI, Query
-from pydantic import BaseModel
+from fastapi import FastAPI
 
-app = FastAPI()
-
-
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: bool
+from .routes import auth, root, test
 
 
-@app.get("/")
-async def root():
-    return dict(a=1)
+def create_app() -> FastAPI:
+    app = FastAPI()
 
+    app.include_router(root.router)
+    app.include_router(auth.router, prefix="/auth", tags=["auth"])
+    app.include_router(test.router, prefix="/test", tags=["test"])
 
-@app.post("/items/{item_id}")
-async def get_item(item_id: int, item: Item = None, q: str = Query(None)):
-    if item:
-        print(item.name)
-    return dict(item_id=item_id, q=q, item=item)
+    return app
