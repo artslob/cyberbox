@@ -17,10 +17,9 @@ To install package locally firstly you need to install these:
 
 .. code-block:: bash
 
-    # in project root
     pyenv install 3.7.4
     pyenv virtualenv 3.7.4 cyberbox
-    # in project root dir:
+    # in project root directory:
     pyenv local cyberbox
     # now virtualenv cyberbox should be active
     poetry install
@@ -53,7 +52,7 @@ Notes
 
 #. To view ``.rst`` format use `restview <https://mg.pov.lt/restview/>`_.
 
-.. code-block:: bash
+   .. code-block:: bash
 
     # runs restview in background without creating nohup.out file
     nohup restview README.rst > /dev/null 2>&1 &
