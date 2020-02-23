@@ -9,7 +9,7 @@ def app():
     return create_app()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def client(app):
     # yield client to enable testing startup and shutdown events:
     # https://fastapi.tiangolo.com/advanced/testing-events/
