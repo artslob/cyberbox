@@ -5,17 +5,18 @@ ENV CI_POETRY_URL="https://raw.githubusercontent.com/python-poetry/poetry/master
     PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONHASHSEED=random \
-#    PIP_NO_CACHE_DIR=off \
+    PIP_NO_CACHE_DIR=off \
 #    PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=1.0.2
+    POETRY_VERSION=1.0.3
 
-RUN    curl -sSL "$CI_POETRY_URL" | python \
-    && poetry -V \
-    # install dependencies to current python interpreter
-    && poetry config virtualenvs.create false
+RUN curl -sSL "$CI_POETRY_URL" | python
+
+WORKDIR /ci-image
 
 COPY poetry.lock pyproject.toml ./
 
-RUN    poetry install \
+RUN    python -m venv venv \
+    && . venv/bin/activate \
+    && poetry install \
     && poetry show
