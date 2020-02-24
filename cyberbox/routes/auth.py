@@ -1,24 +1,30 @@
 from copy import deepcopy
 from datetime import datetime, timedelta
+from uuid import UUID
 
 import jwt
+from databases import Database
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt import PyJWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel
+from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
+
+from cyberbox.models import users
 
 SECRET_KEY = "55aeab38-2e3d-490d-bcdb-b16cd303ef1f"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 5
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 router = APIRouter()
 
 
 class User(BaseModel):
+    uid: UUID = None
     username: str
-    disabled: bool
+    disabled: bool = False
 
 
 class FakeUser(BaseModel):
@@ -61,7 +67,7 @@ def authenticate_user(username, password):
 
 def create_access_token(data: dict):
     data = deepcopy(data)
-    data["exp"] = datetime.utcnow() + timedelta(minutes=5)
+    data["exp"] = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     return jwt.encode(data, SECRET_KEY, ALGORITHM)
 
 
@@ -80,7 +86,13 @@ async def logout():
     return "todo logout"
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_db(request: Request) -> Database:
+    return request.app.db
+
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme), db: Database = Depends(get_db)
+) -> User:
     validation_exc = HTTPException(
         status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate access token"
     )
@@ -92,7 +104,10 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise validation_exc
 
     username: str = payload.get("sub")
-    user = User(**fake_users[username].dict())
+    record = await db.fetch_one(users.select().where(users.c.username == username))
+    if record is None:
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="User does not exist")
+    user = User(**{k: v for k, v in record.items()})
     if user.disabled:
         raise disabled_exc
     return user

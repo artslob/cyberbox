@@ -10,3 +10,12 @@ services:
       POSTGRES_PASSWORD: devpass
       POSTGRES_USER: devuser
       POSTGRES_DB: cyberbox-db
+
+  test-db:
+    image: 'postgres:12.2'
+    ports:
+      - '6432:5432'
+    environment:
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_USER: testuser
+      POSTGRES_DB: cyberbox-test

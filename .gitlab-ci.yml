@@ -12,6 +12,13 @@ before_script:
   - poetry show
 
 tests:
+  services:
+    - postgres:12.2
+  variables:
+    POSTGRES_PASSWORD: testpass
+    POSTGRES_USER: testuser
+    POSTGRES_DB: cyberbox-test
+    CYBERBOX_TEST_DB_URL: "postgresql://testuser:testpass@localhost:5432/cyberbox-test"
   script:
     - pytest
 
