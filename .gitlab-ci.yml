@@ -13,12 +13,13 @@ before_script:
 
 tests:
   services:
-    - postgres:12.2
+    - name: postgres:12.2
+      alias: db
   variables:
     POSTGRES_PASSWORD: testpass
     POSTGRES_USER: testuser
     POSTGRES_DB: cyberbox-test
-    CYBERBOX_TEST_DB_URL: "postgresql://testuser:testpass@localhost:5432/cyberbox-test"
+    CYBERBOX_TEST_DB_URL: "postgresql://testuser:testpass@db:5432/cyberbox-test"
   script:
     - pytest
 
