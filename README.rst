@@ -40,9 +40,11 @@ no need to call ``poetry run`` every time.
 Running backend
 ***************
 
+Create config file and provide path to it in ``CYBERBOX_CONFIG_FILE`` variable:
+
 .. code-block:: bash
 
-    uvicorn 'cyberbox.asgi:app' --reload
+    CYBERBOX_CONFIG_FILE='./configs/config-dev.yaml' uvicorn 'cyberbox.asgi:app' --reload
 
 Then go to http://127.0.0.1:8000.
 

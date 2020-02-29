@@ -2,19 +2,23 @@ import sqlalchemy
 from databases import Database
 from fastapi import FastAPI
 
-from .models import metadata, users
-from .routes import auth, root, test
+from cyberbox.config import parse_config
+from cyberbox.models import metadata, users
+from cyberbox.routes import auth, root, test
 
 
-def create_app(database_url="postgresql://devuser:devpass@localhost:5432/cyberbox-db") -> FastAPI:
+def create_app() -> FastAPI:
     app = FastAPI()
 
-    database = Database(database_url)
+    config = parse_config()
+    app.cfg = config
+
+    database = Database(config.database.url)
     app.db = database
 
     @app.on_event("startup")
     async def startup():
-        engine = sqlalchemy.create_engine(database_url)
+        engine = sqlalchemy.create_engine(config.database.url)
         metadata.drop_all(engine)
         metadata.create_all(engine)
         await database.connect()
