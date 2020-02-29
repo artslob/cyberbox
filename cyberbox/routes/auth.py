@@ -1,5 +1,6 @@
 from copy import deepcopy
 from datetime import datetime, timedelta
+from typing import Optional
 from uuid import UUID
 
 import jwt
@@ -27,25 +28,6 @@ class User(BaseModel):
     disabled: bool = False
 
 
-class FakeUser(BaseModel):
-    username: str
-    disabled: bool = False
-    hashed_password: str
-
-
-fake_users = {
-    # pass is 123
-    "qwe": FakeUser(
-        username="qwe",
-        hashed_password="$2b$12$WCRPaoVwPNmhUXHmHoAkDOrsy4oFnfp/Ozts/iEVoaL2onpsrfZEO",
-    ),
-    "test": FakeUser(
-        username="test",
-        hashed_password="$2b$12$dOUPh.YsYeAfV61S6muToOWJqvJvCVKL99uwBb5a/venqht1m0PZi",
-        disabled=True,
-    ),
-}
-
 crypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -55,14 +37,15 @@ class Token(BaseModel):
     token_type: str
 
 
-def authenticate_user(username, password):
-    user = fake_users.get(username)
-    if not user:
+async def get_db(request: Request) -> Database:
+    return request.app.db
+
+
+async def authenticate_user(username, password, db: Database) -> Optional[User]:
+    row = await db.fetch_one(users.select().where(users.c.username == username))
+    if not row or not crypt_context.verify(password, row["hashed_password"]):
         return None
-    if not crypt_context.verify(password, user.hashed_password):
-        print(crypt_context.hash(password))
-        return None
-    return user
+    return User(**dict(row.items()))
 
 
 def create_access_token(data: dict):
@@ -72,8 +55,8 @@ def create_access_token(data: dict):
 
 
 @router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(form_data.username, form_data.password)
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Database = Depends(get_db)):
+    user = await authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect user or password")
 
@@ -86,30 +69,25 @@ async def logout():
     return "todo logout"
 
 
-async def get_db(request: Request) -> Database:
-    return request.app.db
-
-
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: Database = Depends(get_db)
 ) -> User:
-    validation_exc = HTTPException(
-        status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate access token"
-    )
-    disabled_exc = HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except PyJWTError:
-        raise validation_exc
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate access token"
+        )
 
-    username: str = payload.get("sub")
-    record = await db.fetch_one(users.select().where(users.c.username == username))
-    if record is None:
+    row = await db.fetch_one(users.select().where(users.c.username == payload.get("sub")))
+    if row is None:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="User does not exist")
-    user = User(**{k: v for k, v in record.items()})
+
+    user = User(**dict(row.items()))
     if user.disabled:
-        raise disabled_exc
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
+
     return user
 
 

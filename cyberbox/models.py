@@ -15,4 +15,5 @@ users = sqlalchemy.Table(
     sqlalchemy.Column(
         "disabled", Boolean(), nullable=False, default=False, server_default=expression.false()
     ),
+    sqlalchemy.Column("hashed_password", String(), nullable=False),
 )

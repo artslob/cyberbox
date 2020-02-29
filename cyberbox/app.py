@@ -18,7 +18,12 @@ def create_app(database_url="postgresql://devuser:devpass@localhost:5432/cyberbo
         metadata.drop_all(engine)
         metadata.create_all(engine)
         await database.connect()
-        values = dict(uid="b3b4a8a3-d179-4f10-808d-12980175beb0", username="qwe", disabled=False)
+        values = dict(
+            uid="b3b4a8a3-d179-4f10-808d-12980175beb0",
+            username="qwe",
+            disabled=False,
+            hashed_password="$2b$12$WCRPaoVwPNmhUXHmHoAkDOrsy4oFnfp/Ozts/iEVoaL2onpsrfZEO",
+        )
         await database.execute(users.insert(values=values))
 
     @app.on_event("shutdown")
