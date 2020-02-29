@@ -46,6 +46,25 @@ Running backend
 
 Then go to http://127.0.0.1:8000.
 
+*******
+Testing
+*******
+
+Tests require database:
+
+.. code-block:: bash
+
+    docker-compose up -d
+    export CYBERBOX_TEST_DB_URL="postgresql://testuser:testpass@localhost:6432/cyberbox-test"
+    pytest
+
+Also you can install gitlab-runner locally and use it:
+
+.. code-block:: bash
+
+    # gitlab-runner exec <executor> <job-name>
+    gitlab-runner exec docker tests
+
 ****************************
 Building docker image for CI
 ****************************
