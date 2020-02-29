@@ -1,3 +1,5 @@
 from starlette.templating import Jinja2Templates
 
-templates = Jinja2Templates("cyberbox/templates")
+from cyberbox.const import TEMPLATES_DIR
+
+templates = Jinja2Templates(TEMPLATES_DIR)
