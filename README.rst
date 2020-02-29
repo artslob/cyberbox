@@ -46,6 +46,18 @@ Running backend
 
 Then go to http://127.0.0.1:8000.
 
+****************************
+Building docker image for CI
+****************************
+
+Use following commands:
+
+.. code-block:: bash
+
+    docker login registry.gitlab.com
+    docker build -f .ci/Dockerfile -t registry.gitlab.com/artslob/cyberbox/ci-image:latest .
+    docker push registry.gitlab.com/artslob/cyberbox/ci-image:latest
+
 *****
 Notes
 *****
