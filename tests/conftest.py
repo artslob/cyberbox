@@ -30,7 +30,7 @@ def create_config(tmp_path_factory, database_url) -> Path:
     config = configs_dir / "config-test.yaml"
     config.write_text(
         f"""
-environment: 'dev'
+environment: 'test'
 database:
     url: "{database_url}"
 """
@@ -39,7 +39,7 @@ database:
 
 
 @pytest.fixture()
-def test_config(create_config, monkeypatch):
+def test_config(create_config: Path, monkeypatch):
     monkeypatch.setenv(const.CONFIG_ENV_NAME, str(create_config))
 
 

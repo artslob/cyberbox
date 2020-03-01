@@ -6,6 +6,7 @@ import yaml
 from pydantic import BaseModel
 
 from cyberbox.const import CONFIG_ENV_NAME
+from cyberbox.env import Env
 
 
 class DatabaseConfig(BaseModel):
@@ -13,7 +14,7 @@ class DatabaseConfig(BaseModel):
 
 
 class Config(BaseModel):
-    environment = "dev"
+    environment: Env
     database: DatabaseConfig
 
 
@@ -40,4 +41,4 @@ def parse_config(
         raise ValueError(f"File {config_file_path} does not exist or not a file")
 
     config = loader(config_file)
-    return Config(**config)
+    return Config.parse_obj(config)
