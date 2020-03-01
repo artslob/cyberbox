@@ -45,7 +45,7 @@ async def authenticate_user(username, password, db: Database) -> Optional[User]:
     row = await db.fetch_one(users.select().where(users.c.username == username))
     if not row or not crypt_context.verify(password, row["hashed_password"]):
         return None
-    return User(**dict(row.items()))
+    return User.parse_obj(row)
 
 
 def create_access_token(data: dict):
@@ -84,7 +84,7 @@ async def get_current_user(
     if row is None:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="User does not exist")
 
-    user = User(**dict(row.items()))
+    user = User.parse_obj(row)
     if user.disabled:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
 
