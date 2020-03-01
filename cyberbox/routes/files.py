@@ -23,7 +23,7 @@ class FileModel(BaseModel):
 async def file_list(
     user: User = Depends(get_current_user), db: Database = Depends(get_db),
 ):
-    query = files.select().where(files.c.owner == user.username).limit(50)
+    query = files.select().where(files.c.owner == user.username).limit(10)
     return await db.fetch_all(query)
 
 

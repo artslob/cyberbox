@@ -1,7 +1,6 @@
 import base64
 import json
 
-import pytest
 from starlette.testclient import TestClient
 
 
@@ -9,24 +8,6 @@ def test_not_existing_user_login(client: TestClient):
     """ Login as unknown user failed. """
     response = client.post("/auth/login", data=dict(username="not-existing", password="123"))
     assert response.status_code == 401
-
-
-@pytest.fixture()
-def logged_user(client: TestClient):
-    """ Login with known user produces access token. """
-    username = "qwe"
-    response = client.post("/auth/login", data=dict(username=username, password="123"))
-    assert response.status_code == 200
-
-    result = response.json()
-    assert isinstance(result, dict)
-    assert set(result.keys()) == {"token_type", "access_token"}
-    assert result["token_type"] == "bearer"
-
-    access_token = result["access_token"]
-    assert isinstance(access_token, str)
-
-    return username, access_token
 
 
 def decode_base64_dict_from_str(string: str) -> dict:

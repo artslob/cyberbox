@@ -23,8 +23,10 @@ class User(BaseModel):
     disabled: bool = False
 
 
-async def get_db(request: Request) -> Database:
-    return request.app.db
+async def get_db(request: Request):
+    db: Database = request.app.db
+    async with db.transaction():
+        yield db
 
 
 async def get_current_user(

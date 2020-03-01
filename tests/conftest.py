@@ -54,3 +54,21 @@ def client(app):
     # https://fastapi.tiangolo.com/advanced/testing-events/
     with TestClient(app) as client:
         yield client
+
+
+@pytest.fixture()
+def logged_user(client: TestClient):
+    """ Login with known user produces access token. """
+    username = "qwe"
+    response = client.post("/auth/login", data=dict(username=username, password="123"))
+    assert response.status_code == 200
+
+    result = response.json()
+    assert isinstance(result, dict)
+    assert set(result.keys()) == {"token_type", "access_token"}
+    assert result["token_type"] == "bearer"
+
+    access_token = result["access_token"]
+    assert isinstance(access_token, str)
+
+    return username, access_token
