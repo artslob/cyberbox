@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from cyberbox.config import parse_config
 from cyberbox.models import metadata, users
-from cyberbox.routes import auth, root, test
+from cyberbox.routes import auth, files, root, test
 
 
 def create_app() -> FastAPI:
@@ -36,6 +36,7 @@ def create_app() -> FastAPI:
 
     app.include_router(root.router)
     app.include_router(auth.router, prefix="/auth", tags=["auth"])
+    app.include_router(files.router, prefix="/files", tags=["files"])
     app.include_router(test.router, prefix="/test", tags=["test"])
 
     return app
