@@ -3,14 +3,14 @@ from pathlib import Path
 from typing import Callable
 
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, PostgresDsn
 
 from cyberbox.const import CONFIG_ENV_NAME
 from cyberbox.env import Env
 
 
 class DatabaseConfig(BaseModel):
-    url: str
+    url: PostgresDsn
 
 
 class Config(BaseModel):

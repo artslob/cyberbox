@@ -34,7 +34,7 @@ def test_config(config_factory, env_value, expectation):
         f"""
     environment: {env_value}
     database:
-        url: some-url
+        url: postgresql://user:pass@localhost:1234
     """
     )
     with expectation:
