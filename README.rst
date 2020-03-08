@@ -80,6 +80,35 @@ Use following commands:
     docker push registry.gitlab.com/artslob/cyberbox/ci-image:latest
 
 *****
+Stack
+*****
+Cyberbox made with these tools:
+
+#. `FastAPI <https://fastapi.tiangolo.com>`_ (`starlette <https://www.starlette.io/>`_ +
+   `pydanntic <https://pydantic-docs.helpmanual.io/>`_) - asyncio web framework with cool validation
+   powered by python type hinting.
+#. `encode/databases <https://www.encode.io/databases>`_ for asyncio database interaction
+   (alternative to `GINO <https://python-gino.org/>`_).
+
+Testing:
+
+#. `pytest-asyncio <https://github.com/pytest-dev/pytest-asyncio>`_ - pytest plugin for testing
+   asyncio code.
+#. `encode/httpx <https://www.python-httpx.org/>`_ - asyncio client with support for ability to make
+   requests directly to ASGI applications (alternative to
+   `async-asgi-testclient <https://github.com/vinissimus/async-asgi-testclient>`_). Asynchronous
+   client is used because it allows to interact with database using asyncio like in apps code. But
+   this client requires ``asgi-lifespan`` for ASGI events.
+#. `asgi-lifespan <https://github.com/florimondmanca/asgi-lifespan>`_ - startup/shutdown of ASGI apps.
+
+************
+Useful links
+************
+
+#. `<https://github.com/encode/starlette/issues/104>`_
+#. `<https://github.com/encode/httpx/issues/350>`_
+
+*****
 Notes
 *****
 
