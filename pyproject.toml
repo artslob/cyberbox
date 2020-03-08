@@ -35,6 +35,8 @@ isort = {extras = ["pyproject"], version = "^4.3.21"}
 restview = "^2.9.2"
 flake8 = "^3.7.9"
 pytest-asyncio = "^0.10.0"
+httpx = "^0.11.1"
+asgi-lifespan = "^1.0.0"
 
 [build-system]
 requires = ["poetry>=0.12"]

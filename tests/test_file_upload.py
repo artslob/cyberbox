@@ -3,7 +3,7 @@ from typing import Callable
 from uuid import UUID
 
 import pytest
-from starlette.testclient import TestClient
+from httpx import AsyncClient
 
 
 @pytest.fixture()
@@ -25,21 +25,22 @@ def with_content_type_and_another_name(file, path):
     return dict(file=("another.name.tar.gz", file, "text/plain"))
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "files_factory, expected_name, expected_content_type",
     [
-        [simple_files, "test-file.txt", ""],
+        [simple_files, "test-file.txt", "text/plain"],
         [with_content_type, "test-file.txt", "text/plain"],
         [with_content_type_and_another_name, "another.name.tar.gz", "text/plain"],
     ],
 )
-def test_file_upload(
-    client: TestClient,
+async def test_file_upload(
+    client: AsyncClient,
     test_file: Path,
     logged_user,
     files_factory: Callable,
-    expected_name,
-    expected_content_type,
+    expected_name: str,
+    expected_content_type: str,
 ):
     """ Check that file upload is working and file is shown in file list endpoint. """
 
@@ -48,7 +49,7 @@ def test_file_upload(
 
     with test_file.open() as f:
         files = files_factory(f, test_file)
-        response = client.post("/files/upload", files=files, headers=headers)
+        response = await client.post("/files/upload", files=files, headers=headers)
 
     assert response.status_code == 200
 
@@ -64,7 +65,7 @@ def test_file_upload(
 
     check_file_response_model(upload_result)
 
-    response = client.get("/files/", headers=headers)
+    response = await client.get("/files/", headers=headers)
     assert response.status_code == 200
 
     file_list = response.json()

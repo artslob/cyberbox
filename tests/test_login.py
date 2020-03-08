@@ -1,12 +1,14 @@
 import base64
 import json
 
-from starlette.testclient import TestClient
+import pytest
+from httpx import AsyncClient
 
 
-def test_not_existing_user_login(client: TestClient):
+@pytest.mark.asyncio
+async def test_not_existing_user_login(client: AsyncClient):
     """ Login as unknown user failed. """
-    response = client.post("/auth/login", data=dict(username="not-existing", password="123"))
+    response = await client.post("/auth/login", data=dict(username="not-existing", password="123"))
     assert response.status_code == 401
 
 

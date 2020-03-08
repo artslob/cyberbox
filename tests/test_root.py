@@ -1,8 +1,8 @@
-from starlette.testclient import TestClient
+import pytest
+from httpx import AsyncClient
 
 
-def test_root_page(client: TestClient):
-    response = client.get("/")
+@pytest.mark.asyncio
+async def test_root_page(client: AsyncClient):
+    response = await client.get("/")
     assert response.status_code == 200
-    assert response.template.name == "root.html"
-    assert "request" in response.context

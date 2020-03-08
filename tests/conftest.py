@@ -1,11 +1,16 @@
 import os
 from pathlib import Path
 
+import httpx
 import pytest
-from starlette.testclient import TestClient
+import sqlalchemy
+from asgi_lifespan import LifespanManager
+from databases import Database
+from httpx import AsyncClient
 
 from cyberbox import const
 from cyberbox.app import create_app
+from cyberbox.models import metadata, users
 
 CYBERBOX_TEST_DB_URL = "CYBERBOX_TEST_DB_URL"
 
@@ -25,7 +30,7 @@ def database_url():
 
 
 @pytest.fixture(scope="session")
-def create_config(tmp_path_factory, database_url) -> Path:
+def create_config(tmp_path_factory, database_url: str) -> Path:
     configs_dir = tmp_path_factory.mktemp("configs")
     config = configs_dir / "config-test.yaml"
     config.write_text(
@@ -33,6 +38,7 @@ def create_config(tmp_path_factory, database_url) -> Path:
 environment: 'test'
 database:
     url: "{database_url}"
+    force_rollback: true
 """
     )
     return config
@@ -43,24 +49,60 @@ def test_config(create_config: Path, monkeypatch):
     monkeypatch.setenv(const.CONFIG_ENV_NAME, str(create_config))
 
 
-@pytest.fixture()
-def app(test_config):
-    return create_app()
+@pytest.fixture(scope="session")
+def create_test_database(database_url: str):
+    engine = sqlalchemy.create_engine(database_url)
+    metadata.create_all(engine)
+    yield
+    metadata.drop_all(engine)
 
 
 @pytest.fixture()
-def client(app):
-    # yield client to enable testing startup and shutdown events:
-    # https://fastapi.tiangolo.com/advanced/testing-events/
-    with TestClient(app) as client:
+async def app(test_config, create_test_database):
+    app = create_app()
+    # to enable startup and shutdown events
+    async with LifespanManager(app):
+        yield app
+
+
+@pytest.fixture()
+async def db(app):
+    return app.db
+
+
+@pytest.fixture()
+async def httpx_client(app):
+    async with httpx.AsyncClient(app=app, base_url="http://testserver") as client:
         yield client
 
 
 @pytest.fixture()
-def logged_user(client: TestClient):
-    """ Login with known user produces access token. """
+def client(httpx_client):
+    return httpx_client
+
+
+@pytest.fixture()
+async def create_user(db: Database):
     username = "qwe"
-    response = client.post("/auth/login", data=dict(username=username, password="123"))
+    await db.execute_many(
+        users.insert(),
+        [
+            dict(
+                uid="b3b4a8a3-d179-4f10-808d-12980175beb0",
+                username=username,
+                disabled=False,
+                hashed_password="$2b$12$WCRPaoVwPNmhUXHmHoAkDOrsy4oFnfp/Ozts/iEVoaL2onpsrfZEO",
+            )
+        ],
+    )
+    return username
+
+
+@pytest.fixture()
+async def logged_user(create_user: str, client: AsyncClient):
+    """ Login with known user produces access token. """
+    username = create_user
+    response = await client.post("/auth/login", data=dict(username=username, password="123"))
     assert response.status_code == 200
 
     result = response.json()

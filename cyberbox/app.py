@@ -1,9 +1,7 @@
-import sqlalchemy
 from databases import Database
 from fastapi import FastAPI
 
 from cyberbox.config import parse_config
-from cyberbox.models import metadata, users
 from cyberbox.routes import auth, files, root, test
 
 
@@ -13,22 +11,12 @@ def create_app() -> FastAPI:
     config = parse_config()
     app.cfg = config
 
-    database = Database(config.database.url)
+    database = Database(config.database.url, force_rollback=config.database.force_rollback)
     app.db = database
 
     @app.on_event("startup")
     async def startup():
-        engine = sqlalchemy.create_engine(config.database.url)
-        metadata.drop_all(engine)
-        metadata.create_all(engine)
         await database.connect()
-        values = dict(
-            uid="b3b4a8a3-d179-4f10-808d-12980175beb0",
-            username="qwe",
-            disabled=False,
-            hashed_password="$2b$12$WCRPaoVwPNmhUXHmHoAkDOrsy4oFnfp/Ozts/iEVoaL2onpsrfZEO",
-        )
-        await database.execute(users.insert(values=values))
 
     @app.on_event("shutdown")
     async def shutdown():

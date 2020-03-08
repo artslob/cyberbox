@@ -11,6 +11,7 @@ from cyberbox.env import Env
 
 class DatabaseConfig(BaseModel):
     url: PostgresDsn
+    force_rollback: bool = False
 
 
 class Config(BaseModel):
