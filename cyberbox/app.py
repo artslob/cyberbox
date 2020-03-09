@@ -9,10 +9,10 @@ def create_app() -> FastAPI:
     app = FastAPI()
 
     config = parse_config()
-    app.cfg = config
+    app.state.cfg = config
 
     database = Database(config.database.url, force_rollback=config.database.force_rollback)
-    app.db = database
+    app.state.db = database
 
     @app.on_event("startup")
     async def startup():

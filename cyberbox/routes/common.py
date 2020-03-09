@@ -24,7 +24,7 @@ class User(BaseModel):
 
 
 async def get_db(request: Request):
-    db: Database = request.app.db
+    db: Database = request.app.state.db
     async with db.transaction():
         yield db
 

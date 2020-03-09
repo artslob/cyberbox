@@ -8,8 +8,8 @@ from cyberbox.models import metadata, users
 
 
 async def pre_create_data():
-    database: Database = app.db
-    engine = sqlalchemy.create_engine(app.cfg.database.url)
+    database: Database = app.state.db
+    engine = sqlalchemy.create_engine(app.state.cfg.database.url)
     metadata.drop_all(engine)
     metadata.create_all(engine)
     await database.connect()

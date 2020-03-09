@@ -69,7 +69,7 @@ async def app(test_config, create_test_database):
 
 @pytest.fixture()
 def db(app):
-    return app.db
+    return app.state.db
 
 
 @pytest.fixture()
