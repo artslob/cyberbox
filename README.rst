@@ -78,9 +78,10 @@ Use following commands:
 
 .. code-block:: bash
 
+    tag='registry.gitlab.com/artslob/cyberbox/ci-image:latest'
     docker login registry.gitlab.com
-    docker build -f .ci/Dockerfile -t registry.gitlab.com/artslob/cyberbox/ci-image:latest .
-    docker push registry.gitlab.com/artslob/cyberbox/ci-image:latest
+    docker build -f .ci/Dockerfile -t "$tag" .
+    docker push "$tag"
 
 *****
 Stack
