@@ -29,6 +29,10 @@ async def get_db(request: Request):
         yield db
 
 
+async def get_config(request: Request):
+    return request.app.state.cfg
+
+
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: Database = Depends(get_db)
 ) -> User:

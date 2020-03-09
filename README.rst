@@ -92,6 +92,7 @@ Cyberbox made with these tools:
    powered by python type hinting.
 #. `encode/databases <https://www.encode.io/databases>`_ for asyncio database interaction
    (alternative to `GINO <https://python-gino.org/>`_).
+#. `aiofiles <https://github.com/Tinche/aiofiles>`_ - asyncio interface for file IO.
 
 Testing:
 
@@ -110,6 +111,7 @@ Useful links
 
 #. `<https://github.com/encode/starlette/issues/104>`_
 #. `<https://github.com/encode/httpx/issues/350>`_
+#. `<https://github.com/tiangolo/fastapi/issues/58>`_
 
 *****
 Notes

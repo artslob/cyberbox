@@ -1,14 +1,16 @@
 from typing import List
 from uuid import UUID, uuid4
 
+import aiofiles
 from databases import Database
 from fastapi import Depends, File, HTTPException, UploadFile
 from fastapi.routing import APIRouter
 from pydantic.main import BaseModel
 from starlette.status import HTTP_404_NOT_FOUND
 
+from cyberbox.config import Config
 from cyberbox.models import files
-from cyberbox.routes.common import User, get_current_user, get_db
+from cyberbox.routes.common import User, get_config, get_current_user, get_db
 
 router = APIRouter()
 
@@ -32,11 +34,15 @@ async def file_list(
 async def upload_file(
     user: User = Depends(get_current_user),
     db: Database = Depends(get_db),
+    cfg: Config = Depends(get_config),
     file: UploadFile = File(...),
 ):
-    # TODO save file to filesystem
+    file_uid = uuid4()
+    file_path = cfg.files_dir / str(file_uid)
+    async with aiofiles.open(file_path, "wb") as saved_file:
+        await saved_file.write(await file.read())
     values = dict(
-        uid=uuid4(), owner=user.username, filename=file.filename, content_type=file.content_type
+        uid=file_uid, owner=user.username, filename=file.filename, content_type=file.content_type
     )
     await db.execute(files.insert().values(values))
     return values

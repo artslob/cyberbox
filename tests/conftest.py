@@ -29,11 +29,14 @@ def database_url():
     return url
 
 
-@pytest.fixture(scope="session")
-def create_config(tmp_path_factory, database_url: str) -> Path:
-    configs_dir = tmp_path_factory.mktemp("configs")
-    files_dir = tmp_path_factory.mktemp("files-dir")
-    config = configs_dir / "config-test.yaml"
+@pytest.fixture()
+def files_dir(tmp_path_factory):
+    return tmp_path_factory.mktemp("files_dir")
+
+
+@pytest.fixture()
+def create_config(tmp_path, database_url: str, files_dir: Path) -> Path:
+    config = tmp_path / "config-test.yaml"
     config.write_text(
         f"""
     environment: 'test'

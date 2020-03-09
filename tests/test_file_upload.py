@@ -5,11 +5,13 @@ from uuid import UUID
 import pytest
 from httpx import AsyncClient
 
+content = "some\ncontent"
+
 
 @pytest.fixture()
 def test_file(tmp_path):
     file = tmp_path / "test-file.txt"
-    file.write_text("some\ncontext")
+    file.write_text(content)
     return file
 
 
@@ -41,6 +43,7 @@ async def test_file_upload(
     files_factory: Callable,
     expected_name: str,
     expected_content_type: str,
+    files_dir: Path,
 ):
     """ Check that file upload is working and file is shown in file list endpoint. """
 
@@ -73,3 +76,9 @@ async def test_file_upload(
     assert len(file_list) == 1
 
     check_file_response_model(file_list[0])
+
+    saved_file = files_dir / uid
+    assert saved_file.exists()
+    assert saved_file.read_text() == content
+
+    assert list(i.name for i in files_dir.iterdir()) == [uid]
