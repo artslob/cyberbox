@@ -20,21 +20,25 @@ def config_factory(tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "env_value, expectation",
+    "env_value, force_rollback, expectation",
     [
-        ["test", nullcontext()],
-        ["dev", nullcontext()],
-        ["prod", nullcontext()],
-        ["unknown", pytest.raises(ValidationError)],
-        ["", pytest.raises(ValidationError)],
+        ["test", False, nullcontext()],
+        ["test", True, nullcontext()],
+        ["dev", False, nullcontext()],
+        ["dev", True, pytest.raises(ValidationError)],
+        ["prod", True, pytest.raises(ValidationError)],
+        ["prod", False, nullcontext()],
+        ["unknown", False, pytest.raises(ValidationError)],
+        ["", False, pytest.raises(ValidationError)],
     ],
 )
-def test_config(config_factory, env_value, expectation):
+def test_config(config_factory, env_value, force_rollback, expectation):
     config_factory(
         f"""
     environment: {env_value}
     database:
         url: postgresql://user:pass@localhost:1234
+        force_rollback: {force_rollback}
     """
     )
     with expectation:

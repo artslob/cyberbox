@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Callable
 
 import yaml
-from pydantic import BaseModel, PostgresDsn
+from pydantic import BaseModel, PostgresDsn, root_validator
 
 from cyberbox.const import CONFIG_ENV_NAME
 from cyberbox.env import Env
@@ -17,6 +17,15 @@ class DatabaseConfig(BaseModel):
 class Config(BaseModel):
     environment: Env
     database: DatabaseConfig
+
+    @root_validator
+    def check_force_rollback_only_in_testing(cls, values: dict):
+        # fields didnt pass validation
+        if "environment" not in values or "database" not in values:
+            return values
+        if values["environment"] is not Env.test and values["database"].force_rollback:
+            raise ValueError("force_rollback should be enabled only in testing environment")
+        return values
 
 
 def default_loader(file: Path) -> dict:
