@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Callable
 
 import yaml
-from pydantic import BaseModel, PostgresDsn, root_validator
+from pydantic import BaseModel, DirectoryPath, PostgresDsn, root_validator
 
 from cyberbox.const import CONFIG_ENV_NAME
 from cyberbox.env import Env
@@ -17,6 +17,7 @@ class DatabaseConfig(BaseModel):
 class Config(BaseModel):
     environment: Env
     database: DatabaseConfig
+    files_dir: DirectoryPath
 
     @root_validator
     def check_force_rollback_only_in_testing(cls, values: dict):

@@ -32,14 +32,16 @@ def database_url():
 @pytest.fixture(scope="session")
 def create_config(tmp_path_factory, database_url: str) -> Path:
     configs_dir = tmp_path_factory.mktemp("configs")
+    files_dir = tmp_path_factory.mktemp("files-dir")
     config = configs_dir / "config-test.yaml"
     config.write_text(
         f"""
-environment: 'test'
-database:
-    url: "{database_url}"
-    force_rollback: true
-"""
+    environment: 'test'
+    database:
+        url: "{database_url}"
+        force_rollback: true
+    files_dir: {files_dir}
+    """
     )
     return config
 
@@ -66,7 +68,7 @@ async def app(test_config, create_test_database):
 
 
 @pytest.fixture()
-async def db(app):
+def db(app):
     return app.db
 
 

@@ -19,6 +19,13 @@ def config_factory(tmp_path, monkeypatch):
     return factory
 
 
+@pytest.fixture()
+def files_dir(tmp_path):
+    files_dir = tmp_path / "files-dir"
+    files_dir.mkdir()
+    return files_dir
+
+
 @pytest.mark.parametrize(
     "env_value, force_rollback, expectation",
     [
@@ -32,13 +39,14 @@ def config_factory(tmp_path, monkeypatch):
         ["", False, pytest.raises(ValidationError)],
     ],
 )
-def test_config(config_factory, env_value, force_rollback, expectation):
+def test_config(config_factory, env_value, force_rollback, expectation, files_dir):
     config_factory(
         f"""
     environment: {env_value}
     database:
         url: postgresql://user:pass@localhost:1234
         force_rollback: {force_rollback}
+    files_dir: {files_dir}
     """
     )
     with expectation:
