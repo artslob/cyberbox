@@ -5,12 +5,12 @@ import httpx
 import pytest
 import sqlalchemy
 from asgi_lifespan import LifespanManager
-from databases import Database
-from httpx import AsyncClient
 
 from cyberbox import const
 from cyberbox.app import create_app
-from cyberbox.models import metadata, users
+from cyberbox.models import metadata
+
+pytest_plugins = ["tests.fixtures.auth", "tests.fixtures.data"]
 
 CYBERBOX_TEST_DB_URL = "CYBERBOX_TEST_DB_URL"
 
@@ -84,38 +84,3 @@ async def httpx_client(app):
 @pytest.fixture()
 def client(httpx_client):
     return httpx_client
-
-
-@pytest.fixture()
-async def create_user(db: Database):
-    username = "qwe"
-    await db.execute_many(
-        users.insert(),
-        [
-            dict(
-                uid="b3b4a8a3-d179-4f10-808d-12980175beb0",
-                username=username,
-                disabled=False,
-                hashed_password="$2b$12$WCRPaoVwPNmhUXHmHoAkDOrsy4oFnfp/Ozts/iEVoaL2onpsrfZEO",
-            )
-        ],
-    )
-    return username
-
-
-@pytest.fixture()
-async def logged_user(create_user: str, client: AsyncClient):
-    """ Login with known user produces access token. """
-    username = create_user
-    response = await client.post("/auth/login", data=dict(username=username, password="123"))
-    assert response.status_code == 200
-
-    result = response.json()
-    assert isinstance(result, dict)
-    assert set(result.keys()) == {"token_type", "access_token"}
-    assert result["token_type"] == "bearer"
-
-    access_token = result["access_token"]
-    assert isinstance(access_token, str)
-
-    return username, access_token

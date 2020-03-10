@@ -6,5 +6,5 @@ from cyberbox.models import users
 
 
 @pytest.mark.asyncio
-async def test_user_created(db: Database, create_user):
-    assert await db.execute(select([func.count()]).select_from(users)) == 1
+async def test_user_created(db: Database, create_users):
+    assert await db.execute(select([func.count()]).select_from(users)) == 3
