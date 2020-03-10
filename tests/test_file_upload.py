@@ -87,3 +87,7 @@ async def test_file_upload(
     assert response.status_code == 200
     assert response.text == test_file.read_text()
     assert response.headers["content-disposition"] == f'attachment; filename="{expected_name}"'
+
+    response = await client.delete(f"/files/delete/{uid}", headers=headers)
+    assert response.status_code == 200
+    assert not saved_file.exists()

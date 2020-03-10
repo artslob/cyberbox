@@ -6,7 +6,7 @@ from databases import Database
 from fastapi import Depends, File, HTTPException, UploadFile
 from fastapi.routing import APIRouter
 from pydantic.main import BaseModel
-from starlette.responses import FileResponse
+from starlette.responses import FileResponse, PlainTextResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox.config import Config
@@ -66,5 +66,29 @@ async def download_file(
     return FileResponse(str(file_path), filename=row["filename"])
 
 
-async def delete_file():
-    pass
+@router.delete("/delete/{file_uid}", response_class=PlainTextResponse)
+async def delete_file(
+    file_uid: UUID,
+    user: User = Depends(get_current_user),
+    db: Database = Depends(get_db),
+    cfg: Config = Depends(get_config),
+):
+    query = (
+        files.delete()
+        .where((files.c.owner == user.username) & (files.c.uid == file_uid))
+        .returning(files.c.uid)
+    )
+    result = await db.execute(query)
+    if not result:
+        detail = f"File with uuid {str(file_uid)!r} not found"
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
+
+    file_path = cfg.files_dir / str(file_uid)
+
+    try:
+        file_path.unlink()
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail=f"File with uuid {str(file_uid)!r} does not exist on filesystem",
+        )
