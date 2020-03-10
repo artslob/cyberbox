@@ -82,3 +82,8 @@ async def test_file_upload(
     assert saved_file.read_text() == content
 
     assert list(i.name for i in files_dir.iterdir()) == [uid]
+
+    response = await client.get(f"/files/download/{uid}", headers=headers)
+    assert response.status_code == 200
+    assert response.text == test_file.read_text()
+    assert response.headers["content-disposition"] == f'attachment; filename="{expected_name}"'

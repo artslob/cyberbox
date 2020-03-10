@@ -6,6 +6,7 @@ from databases import Database
 from fastapi import Depends, File, HTTPException, UploadFile
 from fastapi.routing import APIRouter
 from pydantic.main import BaseModel
+from starlette.responses import FileResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox.config import Config
@@ -48,14 +49,22 @@ async def upload_file(
     return values
 
 
-@router.get("/download/{file_uid}", response_model=FileModel)
+@router.get("/download/{file_uid}", response_class=FileResponse)
 async def download_file(
-    file_uid: UUID, user: User = Depends(get_current_user), db: Database = Depends(get_db),
+    file_uid: UUID,
+    user: User = Depends(get_current_user),
+    db: Database = Depends(get_db),
+    cfg: Config = Depends(get_config),
 ):
     query = files.select().where((files.c.owner == user.username) & (files.c.uid == file_uid))
-    file = await db.fetch_one(query)
-    if not file:
+    row = await db.fetch_one(query)
+    if not row:
         detail = f"File with uuid {str(file_uid)!r} not found"
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
 
-    return FileModel.parse_obj(file)
+    file_path = cfg.files_dir / str(file_uid)
+    return FileResponse(str(file_path), filename=row["filename"])
+
+
+async def delete_file():
+    pass
