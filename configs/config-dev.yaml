@@ -1,4 +1,4 @@
 environment: 'dev'
 database:
   url: "postgresql://devuser:devpass@localhost:5432/cyberbox-db"
-files_dir: '/tmp/cyberbox-dev-files'
+files_dir: '/home/artslob/tmp/cyberbox-dev-files'
