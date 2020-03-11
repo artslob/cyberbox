@@ -10,6 +10,7 @@ async def test_not_existing_user_login(client: AsyncClient):
     """ Login as unknown user failed. """
     response = await client.post("/auth/login", data=dict(username="not-existing", password="123"))
     assert response.status_code == 401
+    assert response.json() == {"detail": "Incorrect user or password"}
 
 
 def decode_base64_dict_from_str(string: str) -> dict:
