@@ -23,6 +23,10 @@ def with_content_type(file, path):
     return dict(file=(path.name, file, "text/plain"))
 
 
+def with_another_name(file, path):
+    return dict(file=("another.name.tar.gz", file))
+
+
 def with_content_type_and_another_name(file, path):
     return dict(file=("another.name.tar.gz", file, "text/plain"))
 
@@ -33,6 +37,7 @@ def with_content_type_and_another_name(file, path):
     [
         [simple_files, "test-file.txt", "text/plain"],
         [with_content_type, "test-file.txt", "text/plain"],
+        [with_another_name, "another.name.tar.gz", "application/x-tar"],
         [with_content_type_and_another_name, "another.name.tar.gz", "text/plain"],
     ],
 )
@@ -79,7 +84,7 @@ async def test_file_upload(
 
     saved_file = files_dir / uid
     assert saved_file.exists()
-    assert saved_file.read_text() == content
+    assert saved_file.read_text() == content == test_file.read_text()
 
     assert list(i.name for i in files_dir.iterdir()) == [uid]
 
