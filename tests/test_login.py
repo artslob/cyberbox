@@ -24,7 +24,7 @@ def decode_base64_dict_from_str(string: str) -> dict:
 
 def test_access_token(logged_user):
     """ Check access token fields. """
-    username, access_token = logged_user
+    username, access_token, headers = logged_user
 
     parts = access_token.split(".")
     assert len(parts) == 3

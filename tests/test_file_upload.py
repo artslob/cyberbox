@@ -52,8 +52,7 @@ async def test_file_upload_with_file_factory(
 ):
     """ Check that file upload is working and file is shown in file list endpoint. """
 
-    username, access_token = logged_user
-    headers = {"Authorization": f"Bearer {access_token}"}
+    username, access_token, headers = logged_user
 
     with test_file.open() as f:
         files = files_factory(f, test_file)
@@ -100,8 +99,7 @@ async def test_file_upload_with_file_factory(
 
 @pytest.fixture()
 async def upload_file(logged_user, client, test_file):
-    username, access_token = logged_user
-    headers = {"Authorization": f"Bearer {access_token}"}
+    username, access_token, headers = logged_user
 
     with test_file.open() as f:
         response = await client.post("/files/upload", files=dict(file=f), headers=headers)
@@ -122,8 +120,7 @@ async def test_file_upload_result(upload_file: dict):
 
 @pytest.mark.asyncio
 async def test_file_list(logged_user, upload_file: dict, client: AsyncClient):
-    username, access_token = logged_user
-    headers = {"Authorization": f"Bearer {access_token}"}
+    username, access_token, headers = logged_user
     response = await client.get("/files/", headers=headers)
     assert response.status_code == 200
 
@@ -150,8 +147,7 @@ async def test_file_saved_on_filesystem(files_dir: Path, upload_file: dict, test
 
 @pytest.mark.asyncio
 async def test_file_download(logged_user, client: AsyncClient, upload_file: dict, test_file: Path):
-    username, access_token = logged_user
-    headers = {"Authorization": f"Bearer {access_token}"}
+    username, access_token, headers = logged_user
     uid = upload_file["uid"]
     response = await client.get(f"/files/download/{uid}", headers=headers)
     assert response.status_code == 200
@@ -161,8 +157,7 @@ async def test_file_download(logged_user, client: AsyncClient, upload_file: dict
 
 @pytest.mark.asyncio
 async def test_file_delete(logged_user, client: AsyncClient, upload_file: dict, files_dir: Path):
-    username, access_token = logged_user
-    headers = {"Authorization": f"Bearer {access_token}"}
+    username, access_token, headers = logged_user
     uid = upload_file["uid"]
     saved_file = files_dir / uid
     assert saved_file.exists()

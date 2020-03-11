@@ -17,4 +17,6 @@ async def logged_user(create_users, client: AsyncClient):
     access_token = result["access_token"]
     assert isinstance(access_token, str)
 
-    return username, access_token
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    return username, access_token, headers

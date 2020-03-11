@@ -5,9 +5,9 @@ from httpx import AsyncClient
 @pytest.mark.asyncio
 async def test_profile_info(logged_user, client: AsyncClient):
     """ Check profile endpoint is accessible by access token. """
-    username, access_token = logged_user
+    username, access_token, headers = logged_user
 
-    response = await client.get("auth/profile", headers={"Authorization": f"Bearer {access_token}"})
+    response = await client.get("auth/profile", headers=headers)
     assert response.status_code == 200
 
     result = response.json()
