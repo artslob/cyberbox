@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 import sqlalchemy
-from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy import Boolean, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import expression
 
@@ -25,4 +25,16 @@ files = sqlalchemy.Table(
     sqlalchemy.Column("owner", String(), ForeignKey(users.c.username), nullable=False),
     sqlalchemy.Column("filename", String(), nullable=False),
     sqlalchemy.Column("content_type", String(), nullable=False),
+)
+
+links = sqlalchemy.Table(
+    "links",
+    metadata,
+    sqlalchemy.Column("uid", UUID(), ForeignKey(files.c.uid)),
+    sqlalchemy.Column("link", String(), unique=True, nullable=False),
+    sqlalchemy.Column(
+        "is_onetime", Boolean(), default=False, server_default=expression.false(), nullable=False
+    ),
+    # TODO created time
+    sqlalchemy.Column("visited_count", Integer(), default=0, server_default="0", nullable=False),
 )
