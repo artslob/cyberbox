@@ -2,7 +2,7 @@ from databases import Database
 from fastapi import FastAPI
 
 from cyberbox.config import parse_config
-from cyberbox.routes import auth, files, root, test
+from cyberbox.routes import auth, files, links, root, test
 
 
 def create_app() -> FastAPI:
@@ -25,6 +25,7 @@ def create_app() -> FastAPI:
     app.include_router(root.router)
     app.include_router(auth.router, prefix="/auth", tags=["auth"])
     app.include_router(files.router, prefix="/files", tags=["files"])
+    app.include_router(links.router, prefix="/links", tags=["links"])
     app.include_router(test.router, prefix="/test", tags=["test"])
 
     return app
