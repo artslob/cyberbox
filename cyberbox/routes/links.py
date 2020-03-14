@@ -40,9 +40,14 @@ async def create_link(
     return values
 
 
-@router.get("/{file_uid}/info", response_model=Link)
-async def link_info(file_uid: UUID):
-    pass
+@router.get("/{link}/info", response_model=Link)
+async def link_info(link: str, db: Database = Depends(get_db)):
+    row = await db.fetch_one(links.select().where(links.c.link == link))
+    if not row:
+        detail = f"Link with value {link!r} does not exist"
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
+
+    return row
 
 
 @router.get("/")

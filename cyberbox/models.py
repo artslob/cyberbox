@@ -39,3 +39,5 @@ links = sqlalchemy.Table(
     # TODO valid to time
     sqlalchemy.Column("visited_count", Integer(), default=0, server_default="0", nullable=False),
 )
+
+# TODO set on_delete on_update
