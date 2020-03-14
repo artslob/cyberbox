@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from httpx import AsyncClient
 
@@ -32,3 +34,19 @@ async def test_link_info(create_link: dict, client: AsyncClient, upload_file: di
     assert len(json["link"]) == 22
     assert json["is_onetime"] is False
     assert json["visited_count"] == 0
+
+
+@pytest.mark.asyncio
+async def test_download_file_by_link(create_link: dict, client: AsyncClient, test_file: Path):
+    response = await client.get(f"/links/{create_link['link']}")
+    assert response.status_code == 200
+
+    assert response.text == test_file.read_text()
+    assert response.headers["content-disposition"] == f'attachment; filename="test-file.txt"'
+
+
+@pytest.mark.asyncio
+async def test_download_file_by_link_404(create_link: dict, client: AsyncClient, test_file: Path):
+    response = await client.get(f"/links/not-existing-link")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Link does not exist"}

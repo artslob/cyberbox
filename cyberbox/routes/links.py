@@ -4,10 +4,13 @@ from uuid import UUID
 from databases import Database
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic.main import BaseModel
+from starlette.responses import FileResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
+from cyberbox.config import Config
 from cyberbox.models import files, links
-from cyberbox.routes.common import User, get_current_user, get_db
+from cyberbox.routes.common import User, get_config, get_current_user, get_db
+from cyberbox.routes.files import FileModel
 
 router = APIRouter()
 
@@ -50,9 +53,19 @@ async def link_info(link: str, db: Database = Depends(get_db)):
     return row
 
 
-@router.get("/")
-async def download_file_by_link():
-    pass
+@router.get("/{link}", response_model=FileModel)
+async def download_file_by_link(
+    link: str, db: Database = Depends(get_db), cfg: Config = Depends(get_config)
+):
+    join = files.join(links, links.c.link == link)
+    query = files.select().select_from(join)
+    row = await db.fetch_one(query)
+    if not row:
+        detail = "Link does not exist"
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
+
+    file_path = cfg.files_dir / str(row["uid"])
+    return FileResponse(str(file_path), filename=row["filename"])
 
 
 # TODO download by one time link
