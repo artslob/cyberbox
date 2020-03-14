@@ -36,5 +36,6 @@ links = sqlalchemy.Table(
         "is_onetime", Boolean(), default=False, server_default=expression.false(), nullable=False
     ),
     # TODO created time
+    # TODO valid to time
     sqlalchemy.Column("visited_count", Integer(), default=0, server_default="0", nullable=False),
 )

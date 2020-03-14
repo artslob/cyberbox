@@ -9,15 +9,6 @@ from sqlalchemy import func, select
 
 from cyberbox.models import files
 
-content = "some\ncontent"
-
-
-@pytest.fixture()
-def test_file(tmp_path):
-    file = tmp_path / "test-file.txt"
-    file.write_text(content)
-    return file
-
 
 def simple_files(file, path):
     return dict(file=file)
@@ -94,17 +85,6 @@ async def test_file_upload_with_file_factory(
     )
 
 
-@pytest.fixture()
-async def upload_file(logged_user, client, test_file):
-    username, access_token, headers = logged_user
-
-    with test_file.open() as f:
-        response = await client.post("/files/upload", files=dict(file=f), headers=headers)
-
-    assert response.status_code == 200
-    return response.json()
-
-
 @pytest.mark.asyncio
 async def test_file_upload_result(upload_file: dict):
     """ Check json response after file upload. """
@@ -131,7 +111,7 @@ async def test_file_saved_on_filesystem(files_dir: Path, upload_file: dict, test
     uid = upload_file["uid"]
     saved_file = files_dir / uid
     assert saved_file.exists()
-    assert saved_file.read_text() == test_file.read_text() == content
+    assert saved_file.read_text() == test_file.read_text()
     assert list(i.name for i in files_dir.iterdir()) == [uid]
 
 
@@ -142,7 +122,7 @@ async def test_file_download(logged_user, client: AsyncClient, upload_file: dict
     uid = upload_file["uid"]
     response = await client.get(f"/files/download/{uid}", headers=headers)
     assert response.status_code == 200
-    assert response.text == test_file.read_text() == content
+    assert response.text == test_file.read_text()
     assert response.headers["content-disposition"] == f'attachment; filename="test-file.txt"'
 
 
