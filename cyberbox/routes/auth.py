@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from starlette.status import HTTP_401_UNAUTHORIZED
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from cyberbox.models import users
 from cyberbox.routes.common import ALGORITHM, SECRET_KEY, User, get_current_user, get_db
@@ -43,6 +43,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Database =
     user = await authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect user or password")
+
+    if user.disabled:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
 
     token = create_access_token(dict(sub=user.username))
     return Token(access_token=token, token_type="bearer")

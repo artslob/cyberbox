@@ -6,6 +6,7 @@ from sqlalchemy_utils import create_database, drop_database
 
 from cyberbox.asgi import app
 from cyberbox.models import metadata, users
+from cyberbox.routes.auth import crypt_context
 
 
 async def pre_create_data():
@@ -25,7 +26,7 @@ async def pre_create_data():
             uid="b3b4a8a3-d179-4f10-808d-12980175beb0",
             username="qwe",
             disabled=False,
-            hashed_password="$2b$12$WCRPaoVwPNmhUXHmHoAkDOrsy4oFnfp/Ozts/iEVoaL2onpsrfZEO",
+            hashed_password=crypt_context.hash("123"),
         )
         await database.execute(users.insert(values=values))
 
