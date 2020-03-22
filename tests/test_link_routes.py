@@ -79,3 +79,15 @@ async def test_delete_link(create_link: dict, client: AsyncClient, logged_user, 
     assert response.status_code == 200
 
     assert await db.execute(select([func.count()]).select_from(links)) == 0
+
+
+@pytest.mark.asyncio
+async def test_delete_link_not_owner(create_link: dict, client: AsyncClient, active_user):
+    """ Check that not owner cannot delete link of another user. """
+
+    username, access_token, headers = active_user
+
+    link = create_link["link"]
+    response = await client.delete(f"/links/{link}", headers=headers)
+    assert response.status_code == 404
+    assert response.json() == {"detail": f"Link '{link}' does not exist"}

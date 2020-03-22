@@ -84,4 +84,4 @@ async def delete_link(
     )
     deleted_link = await db.execute(query)
     if deleted_link != link:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Link {link} does not exist")
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Link {link!r} does not exist")
