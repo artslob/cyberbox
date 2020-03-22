@@ -4,14 +4,13 @@ from uuid import UUID
 from databases import Database
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic.main import BaseModel
-from sqlalchemy import select
+from sqlalchemy import exists, select
 from starlette.responses import FileResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox.config import Config
 from cyberbox.models import files, links
 from cyberbox.routes.common import User, get_config, get_current_user, get_db
-from cyberbox.routes.files import FileModel
 
 router = APIRouter()
 
@@ -31,10 +30,9 @@ async def create_link(
     db: Database = Depends(get_db),
     is_onetime: bool = False,
 ):
-    # TODO change select all fields to check existence
-    query = files.select().where((files.c.owner == user.username) & (files.c.uid == file_uid))
-    row = await db.fetch_one(query)
-    if not row:
+    query = select([exists().where((files.c.owner == user.username) & (files.c.uid == file_uid))])
+    is_exist = await db.fetch_one(query)
+    if not is_exist:
         detail = f"File with uuid {str(file_uid)!r} not found"
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
 
@@ -55,7 +53,7 @@ async def link_info(link: str, db: Database = Depends(get_db)):
     return row
 
 
-@router.get("/{link}", response_model=FileModel)
+@router.get("/{link}", response_class=FileResponse)
 async def download_file_by_link(
     link: str, db: Database = Depends(get_db), cfg: Config = Depends(get_config)
 ):
