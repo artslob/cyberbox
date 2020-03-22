@@ -9,6 +9,8 @@ from cyberbox.models import metadata, users
 
 
 async def pre_create_data():
+    # TODO add test on this method
+
     database: Database = app.state.db
     db_url = app.state.cfg.database.url
     engine = sqlalchemy.create_engine(db_url)

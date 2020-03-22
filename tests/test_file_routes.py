@@ -120,7 +120,7 @@ async def test_file_download(logged_user, client: AsyncClient, upload_file: dict
     """ Check file can be downloaded and content is valid. """
     username, access_token, headers = logged_user
     uid = upload_file["uid"]
-    response = await client.get(f"/files/download/{uid}", headers=headers)
+    response = await client.get(f"/files/{uid}", headers=headers)
     assert response.status_code == 200
     assert response.text == test_file.read_text()
     assert response.headers["content-disposition"] == f'attachment; filename="test-file.txt"'
@@ -137,7 +137,7 @@ async def test_file_delete(
     assert saved_file.exists()
     assert await db.execute(select([func.count()]).select_from(files)) == 1
 
-    response = await client.delete(f"/files/delete/{uid}", headers=headers)
+    response = await client.delete(f"/files/{uid}", headers=headers)
     assert response.status_code == 200
     assert not saved_file.exists()
 

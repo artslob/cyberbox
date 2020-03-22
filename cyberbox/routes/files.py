@@ -27,6 +27,7 @@ class FileModel(BaseModel):
 async def file_list(
     user: User = Depends(get_current_user), db: Database = Depends(get_db),
 ):
+    # TODO improve filter
     query = files.select().where(files.c.owner == user.username).limit(10)
     return await db.fetch_all(query)
 
@@ -49,7 +50,7 @@ async def upload_file(
     return values
 
 
-@router.get("/download/{file_uid}", response_class=FileResponse)
+@router.get("/{file_uid}", response_class=FileResponse)
 async def download_file(
     file_uid: UUID,
     user: User = Depends(get_current_user),
@@ -66,7 +67,7 @@ async def download_file(
     return FileResponse(str(file_path), filename=row["filename"])
 
 
-@router.delete("/delete/{file_uid}", response_class=PlainTextResponse)
+@router.delete("/{file_uid}", response_class=PlainTextResponse)
 async def delete_file(
     file_uid: UUID,
     user: User = Depends(get_current_user),

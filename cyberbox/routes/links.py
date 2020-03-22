@@ -31,6 +31,7 @@ async def create_link(
     db: Database = Depends(get_db),
     is_onetime: bool = False,
 ):
+    # TODO change select all fields to check existence
     query = files.select().where((files.c.owner == user.username) & (files.c.uid == file_uid))
     row = await db.fetch_one(query)
     if not row:
