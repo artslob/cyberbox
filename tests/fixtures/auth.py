@@ -2,10 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 
-@pytest.fixture()
-async def logged_user(create_users, client: AsyncClient):
-    """ Login with known user produces access token. """
-    username = "test_user"
+async def login_as(username: str, client: AsyncClient) -> tuple:
     response = await client.post("/auth/login", data=dict(username=username, password="123"))
     assert response.status_code == 200
 
@@ -20,3 +17,14 @@ async def logged_user(create_users, client: AsyncClient):
     headers = {"Authorization": f"Bearer {access_token}"}
 
     return username, access_token, headers
+
+
+@pytest.fixture()
+async def logged_user(create_users, client: AsyncClient):
+    """ Login with known user produces access token. """
+    return await login_as("test_user", client)
+
+
+@pytest.fixture()
+async def active_user(create_users, client: AsyncClient):
+    return await login_as("active_user", client)
