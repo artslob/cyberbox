@@ -4,6 +4,7 @@ from uuid import UUID
 from databases import Database
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic.main import BaseModel
+from sqlalchemy import select
 from starlette.responses import FileResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
@@ -71,6 +72,16 @@ async def download_file_by_link(
 # TODO download by one time link
 
 
-@router.delete("/")
-async def delete_link():
-    pass
+@router.delete("/{link}")
+async def delete_link(
+    link: str, db: Database = Depends(get_db), user: User = Depends(get_current_user)
+):
+    query = (
+        links.delete()
+        .where(links.c.link == link)
+        .where(links.c.uid == select([files.c.uid]).where(files.c.owner == user.username))
+        .returning(links.c.link)
+    )
+    deleted_link = await db.execute(query)
+    if deleted_link != link:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f"Link {link} does not exist")

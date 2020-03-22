@@ -1,7 +1,11 @@
 from pathlib import Path
 
 import pytest
+from databases import Database
 from httpx import AsyncClient
+from sqlalchemy import func, select
+
+from cyberbox.models import links
 
 
 @pytest.fixture()
@@ -15,7 +19,9 @@ async def create_link(logged_user, upload_file: dict, client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_link_creation(create_link: dict, upload_file: dict):
+async def test_link_creation(create_link: dict, upload_file: dict, db: Database):
+    assert await db.execute(select([func.count()]).select_from(links)) == 1
+
     assert create_link["uid"] == upload_file["uid"]
     assert isinstance(create_link["link"], str)
     assert len(create_link["link"]) == 22
@@ -50,3 +56,15 @@ async def test_download_file_by_link_404(create_link: dict, client: AsyncClient,
     response = await client.get(f"/links/not-existing-link")
     assert response.status_code == 404
     assert response.json() == {"detail": "Link does not exist"}
+
+
+@pytest.mark.asyncio
+async def test_delete_link(create_link: dict, client: AsyncClient, logged_user, db: Database):
+    username, access_token, headers = logged_user
+
+    assert await db.execute(select([func.count()]).select_from(links)) == 1
+
+    response = await client.delete(f"/links/{create_link['link']}", headers=headers)
+    assert response.status_code == 200
+
+    assert await db.execute(select([func.count()]).select_from(links)) == 0
