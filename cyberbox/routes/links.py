@@ -31,7 +31,8 @@ async def create_link(
     is_onetime: bool = False,
 ):
     query = select([exists().where((files.c.owner == user.username) & (files.c.uid == file_uid))])
-    is_exist = await db.fetch_one(query)
+    record = await db.fetch_one(query)
+    is_exist = record[0]
     if not is_exist:
         detail = f"File with uuid {str(file_uid)!r} not found"
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)

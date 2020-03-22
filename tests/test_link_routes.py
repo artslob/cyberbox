@@ -8,6 +8,17 @@ from sqlalchemy import func, select
 from cyberbox.models import links
 
 
+@pytest.mark.asyncio
+async def test_create_link_by_not_owner(active_user, upload_file: dict, client: AsyncClient):
+    """ Check that not owner cannot create link for some file. """
+    username, access_token, headers = active_user
+
+    file_uid = upload_file["uid"]
+    response = await client.post(f"/links/{file_uid}", json=dict(is_onetime=False), headers=headers)
+    assert response.status_code == 404
+    assert response.json() == {"detail": f"File with uuid '{file_uid}' not found"}
+
+
 @pytest.fixture()
 async def create_link(logged_user, upload_file: dict, client: AsyncClient):
     username, access_token, headers = logged_user
