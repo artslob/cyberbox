@@ -127,6 +127,15 @@ async def test_file_download(logged_user, client: AsyncClient, upload_file: dict
 
 
 @pytest.mark.asyncio
+async def test_file_download_by_not_owner(active_user, client: AsyncClient, upload_file: dict):
+    """ Check that not owner user cannot download file. """
+    username, access_token, headers = active_user
+    uid = upload_file["uid"]
+    response = await client.get(f"/files/{uid}", headers=headers)
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_file_delete(
     logged_user, client: AsyncClient, upload_file: dict, files_dir: Path, db: Database
 ):
@@ -142,3 +151,16 @@ async def test_file_delete(
     assert not saved_file.exists()
 
     assert await db.execute(select([func.count()]).select_from(files)) == 0
+
+
+@pytest.mark.asyncio
+async def test_file_delete_by_not_owner(
+    active_user, client: AsyncClient, upload_file: dict, files_dir: Path, db: Database
+):
+    """ Check file cannot be deleted by not owner user. """
+    username, access_token, headers = active_user
+    uid = upload_file["uid"]
+    saved_file = files_dir / uid
+    response = await client.delete(f"/files/{uid}", headers=headers)
+    assert response.status_code == 404
+    assert saved_file.exists()
