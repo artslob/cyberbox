@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import arrow
 import pytest
 from databases import Database
 from httpx import AsyncClient
@@ -29,15 +30,20 @@ async def create_link(logged_user, upload_file: dict, client: AsyncClient):
     return response.json()
 
 
+def check_link_info(link_info: dict, upload_file: dict):
+    assert link_info["uid"] == upload_file["uid"]
+    assert isinstance(link_info["link"], str)
+    assert len(link_info["link"]) == 22
+    assert link_info["is_onetime"] is False
+    assert link_info["visited_count"] == 0
+    assert isinstance(link_info["created"], str)
+    assert arrow.get(link_info["created"]) > arrow.utcnow().shift(minutes=-1)
+
+
 @pytest.mark.asyncio
 async def test_link_creation(create_link: dict, upload_file: dict, db: Database):
     assert await db.execute(select([func.count()]).select_from(links)) == 1
-
-    assert create_link["uid"] == upload_file["uid"]
-    assert isinstance(create_link["link"], str)
-    assert len(create_link["link"]) == 22
-    assert create_link["is_onetime"] is False
-    assert create_link["visited_count"] == 0
+    check_link_info(create_link, upload_file)
 
 
 @pytest.mark.asyncio
@@ -46,11 +52,7 @@ async def test_link_info(create_link: dict, client: AsyncClient, upload_file: di
     assert response.status_code == 200
 
     json = response.json()
-    assert json["uid"] == upload_file["uid"]
-    assert isinstance(json["link"], str)
-    assert len(json["link"]) == 22
-    assert json["is_onetime"] is False
-    assert json["visited_count"] == 0
+    check_link_info(json, upload_file)
 
 
 @pytest.mark.asyncio

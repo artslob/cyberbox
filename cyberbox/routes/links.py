@@ -1,6 +1,8 @@
 import secrets
+from datetime import datetime
 from uuid import UUID
 
+import arrow
 from databases import Database
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic.main import BaseModel
@@ -19,6 +21,7 @@ class Link(BaseModel):
     uid: UUID
     link: str
     is_onetime: bool
+    created: datetime
     visited_count: int
 
 
@@ -40,11 +43,15 @@ async def create_link(
         detail = f"File with uuid {str(file_uid)!r} not found"
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
 
-    values = dict(
-        uid=file_uid, link=secrets.token_urlsafe(16), is_onetime=is_onetime, visited_count=0
+    link = Link(
+        uid=file_uid,
+        link=secrets.token_urlsafe(16),
+        is_onetime=is_onetime,
+        created=arrow.utcnow().datetime,
+        visited_count=0,
     )
-    await db.execute(links.insert().values(values))
-    return values
+    await db.execute(links.insert().values(link.dict()))
+    return link
 
 
 @router.get("/{link}/info", response_model=Link)

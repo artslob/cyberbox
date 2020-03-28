@@ -34,8 +34,9 @@ links = sqlalchemy.Table(
     Column(
         "is_onetime", Boolean(), default=False, server_default=expression.false(), nullable=False
     ),
-    # TODO created time, valid_to time
+    Column("created", TIMESTAMP(timezone=True), nullable=False),
     Column("visited_count", Integer(), default=0, server_default="0", nullable=False),
+    # TODO valid_to time
 )
 
 # TODO set on_delete on_update
