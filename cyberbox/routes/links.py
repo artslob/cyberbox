@@ -75,6 +75,9 @@ async def download_file_by_link(
         detail = "Link does not exist"
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
 
+    increment = links.update().where(links.c.link == link)
+    await db.execute(increment, dict(visited_count=links.c.visited_count + 1))
+
     file_path = cfg.files_dir / str(row["uid"])
     return FileResponse(str(file_path), filename=row["filename"])
 

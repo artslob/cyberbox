@@ -56,12 +56,21 @@ async def test_link_info(create_link: dict, client: AsyncClient, upload_file: di
 
 
 @pytest.mark.asyncio
-async def test_download_file_by_link(create_link: dict, client: AsyncClient, test_file: Path):
-    response = await client.get(f"/links/{create_link['link']}")
-    assert response.status_code == 200
+async def test_download_file_by_link(
+    create_link: dict, client: AsyncClient, test_file: Path, db: Database
+):
+    """ Check file can be downloaded by link. Check visited_count was incremented. """
+    i, n = 0, 3
+    link = create_link["link"]
+    for i in range(3):
+        response = await client.get(f"/links/{link}")
+        assert response.status_code == 200
 
     assert response.text == test_file.read_text()
     assert response.headers["content-disposition"] == f'attachment; filename="test-file.txt"'
+
+    query = select([links.c.visited_count]).where(links.c.link == link)
+    assert await db.execute(query) == n
 
 
 @pytest.mark.asyncio
