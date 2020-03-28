@@ -19,12 +19,9 @@ tests:
   script:
     - pytest --color=yes
 
-black:
+code-style:
   script:
     - black --check .
-
-isort:
-  script:
     - isort -rc --check-only .
 
 flake8:
