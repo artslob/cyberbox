@@ -62,7 +62,7 @@ async def test_download_file_by_link(
     """ Check file can be downloaded by link. Check visited_count was incremented. """
     i, n = 0, 3
     link = create_link["link"]
-    for i in range(3):
+    for i in range(n):
         response = await client.get(f"/links/{link}")
         assert response.status_code == 200
 
