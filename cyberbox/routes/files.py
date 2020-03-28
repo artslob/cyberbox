@@ -1,7 +1,9 @@
+from datetime import datetime
 from typing import List
 from uuid import UUID, uuid4
 
 import aiofiles
+import arrow
 from databases import Database
 from fastapi import Depends, File, HTTPException, UploadFile
 from fastapi.routing import APIRouter
@@ -21,6 +23,7 @@ class FileModel(BaseModel):
     owner: str
     filename: str
     content_type: str
+    created: datetime
 
 
 @router.get("/", response_model=List[FileModel])
@@ -44,7 +47,11 @@ async def upload_file(
     async with aiofiles.open(file_path, "wb") as saved_file:
         await saved_file.write(await file.read())
     values = dict(
-        uid=file_uid, owner=user.username, filename=file.filename, content_type=file.content_type
+        uid=file_uid,
+        owner=user.username,
+        filename=file.filename,
+        content_type=file.content_type,
+        created=arrow.utcnow().datetime,
     )
     await db.execute(files.insert().values(values))
     return values

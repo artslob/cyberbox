@@ -1,7 +1,9 @@
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 from uuid import UUID
 
+import arrow
 import pytest
 from databases import Database
 from httpx import AsyncClient
@@ -37,6 +39,8 @@ def check_file_response_model(
     assert file_model["filename"] == expected_name
     assert file_model["owner"] == username
     assert file_model["content_type"] == expected_content_type
+    assert isinstance(file_model["created"], str)
+    assert arrow.get(file_model["created"]).isoformat() == file_model["created"]
 
 
 @pytest.mark.asyncio
@@ -113,6 +117,25 @@ async def test_file_saved_on_filesystem(files_dir: Path, upload_file: dict, test
     assert saved_file.exists()
     assert saved_file.read_text() == test_file.read_text()
     assert list(i.name for i in files_dir.iterdir()) == [uid]
+
+
+@pytest.mark.asyncio
+async def test_db_file_model(upload_file: dict, db: Database):
+    query = files.select().where(files.c.uid == upload_file["uid"])
+    row = await db.fetch_one(query)
+    expected_name = "test-file.txt"
+    username = "test_user"
+    expected_content_type = "text/plain"
+
+    assert isinstance(row["uid"], UUID)
+    assert row["filename"] == expected_name
+    assert row["owner"] == username
+    assert row["content_type"] == expected_content_type
+    created = row["created"]
+    assert isinstance(created, datetime)
+    assert created.tzinfo == timezone.utc
+    # comparing with aware datetime is working
+    assert created > arrow.utcnow().shift(minutes=-10).datetime
 
 
 @pytest.mark.asyncio

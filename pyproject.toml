@@ -29,6 +29,7 @@ databases = {extras = ["postgresql"], version = "^0.2.6"}
 pyyaml = "^5.3"
 aiofiles = "^0.4.0"
 sqlalchemy_utils = "^0.36.1"
+arrow = "^0.15.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
