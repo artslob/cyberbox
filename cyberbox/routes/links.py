@@ -91,7 +91,7 @@ async def delete_link(
     query = (
         links.delete()
         .where(links.c.link == link)
-        .where(links.c.uid == select([files.c.uid]).where(files.c.owner == user.username))
+        .where(links.c.uid.in_(select([files.c.uid]).where(files.c.owner == user.username)))
         .returning(links.c.link)
     )
     deleted_link = await db.execute(query)
