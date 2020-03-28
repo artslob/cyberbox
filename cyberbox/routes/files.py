@@ -42,19 +42,20 @@ async def upload_file(
     cfg: Config = Depends(get_config),
     file: UploadFile = File(...),
 ):
-    file_uid = uuid4()
-    file_path = cfg.files_dir / str(file_uid)
-    async with aiofiles.open(file_path, "wb") as saved_file:
-        await saved_file.write(await file.read())
-    values = dict(
-        uid=file_uid,
+    file_model = FileModel(
+        uid=uuid4(),
         owner=user.username,
         filename=file.filename,
         content_type=file.content_type,
         created=arrow.utcnow().datetime,
     )
-    await db.execute(files.insert().values(values))
-    return values
+    await db.execute(files.insert().values(file_model.dict()))
+
+    file_path = cfg.files_dir / str(file_model.uid)
+    async with aiofiles.open(file_path, "wb") as saved_file:
+        await saved_file.write(await file.read())
+
+    return file_model
 
 
 @router.get("/{file_uid}", response_class=FileResponse)
