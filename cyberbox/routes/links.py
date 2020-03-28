@@ -22,6 +22,9 @@ class Link(BaseModel):
     visited_count: int
 
 
+# TODO link list endpoint
+
+
 @router.post("/{file_uid}", response_model=Link)
 async def create_link(
     *,
@@ -58,8 +61,8 @@ async def link_info(link: str, db: Database = Depends(get_db)):
 async def download_file_by_link(
     link: str, db: Database = Depends(get_db), cfg: Config = Depends(get_config)
 ):
-    join = files.join(links, links.c.link == link)
-    query = files.select().select_from(join)
+    join = files.join(links)
+    query = files.select().where(links.c.link == link).select_from(join)
     row = await db.fetch_one(query)
     if not row:
         detail = "Link does not exist"
