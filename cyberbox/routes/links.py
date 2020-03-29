@@ -4,7 +4,7 @@ from uuid import UUID
 
 import arrow
 from databases import Database
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 from pydantic.main import BaseModel
 from sqlalchemy import exists, select
 from starlette.responses import FileResponse
@@ -23,6 +23,7 @@ class Link(BaseModel):
     is_onetime: bool
     created: datetime
     visited_count: int
+    valid_until: datetime = None
 
 
 # TODO link list endpoint
@@ -34,7 +35,8 @@ async def create_link(
     file_uid: UUID,
     user: User = Depends(get_current_user),
     db: Database = Depends(get_db),
-    is_onetime: bool = False,
+    is_onetime: bool = Body(False),
+    valid_until: datetime = Body(None),
 ):
     query = select([exists().where((files.c.owner == user.username) & (files.c.uid == file_uid))])
     is_exist = await db.execute(query)
@@ -42,12 +44,16 @@ async def create_link(
         detail = f"File with uuid {str(file_uid)!r} not found"
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
 
+    if valid_until is not None:
+        valid_until = arrow.get(valid_until).datetime
+
     link = Link(
         uid=file_uid,
         link=secrets.token_urlsafe(16),
         is_onetime=is_onetime,
         created=arrow.utcnow().datetime,
         visited_count=0,
+        valid_until=valid_until,
     )
     await db.execute(links.insert().values(link.dict()))
     return link
@@ -67,8 +73,12 @@ async def link_info(link: str, db: Database = Depends(get_db)):
 async def download_file_by_link(
     link: str, db: Database = Depends(get_db), cfg: Config = Depends(get_config)
 ):
-    join = files.join(links)
-    query = files.select().where(links.c.link == link).select_from(join)
+    query = (
+        files.select()
+        .where(links.c.link == link)
+        .where(links.c.valid_until.is_(None) | (links.c.valid_until >= arrow.utcnow().datetime))
+        .select_from(files.join(links))
+    )
     row = await db.fetch_one(query)
     if not row:
         detail = "Link does not exist"
