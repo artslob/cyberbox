@@ -73,22 +73,36 @@ async def link_info(link: str, db: Database = Depends(get_db)):
 async def download_file_by_link(
     link: str, db: Database = Depends(get_db), cfg: Config = Depends(get_config)
 ):
+    not_found = HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Link does not exist")
+
     query = (
-        files.select()
+        select([files, links.c.is_onetime])
         .where(links.c.link == link)
         .where(links.c.valid_until.is_(None) | (links.c.valid_until >= arrow.utcnow().datetime))
         .select_from(files.join(links))
     )
     row = await db.fetch_one(query)
     if not row:
-        detail = "Link does not exist"
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
+        raise not_found
 
-    increment = links.update().where(links.c.link == link)
-    await db.execute(increment, dict(visited_count=links.c.visited_count + 1))
+    is_onetime = False
+    if row[links.c.is_onetime]:
+        is_onetime = True
+        # set lock on row
+        row = await db.fetch_one(query.with_for_update())
 
-    file_path = cfg.files_dir / str(row["uid"])
-    return FileResponse(str(file_path), filename=row["filename"])
+    if not row:
+        raise not_found
+
+    if is_onetime:
+        delete = links.delete().where(links.c.link == link)
+        await db.execute(delete)
+    else:
+        increment = links.update().where(links.c.link == link)
+        await db.execute(increment, dict(visited_count=links.c.visited_count + 1))
+
+    file_path = cfg.files_dir / str(row[files.c.uid])
+    return FileResponse(str(file_path), filename=row[files.c.filename])
 
 
 # TODO download by one time link

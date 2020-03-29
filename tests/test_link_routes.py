@@ -86,11 +86,11 @@ async def test_download_file_by_link(
 @pytest.mark.parametrize("minutes_shift, expected_status", [[-10, 404], [10, 200]])
 @pytest.mark.asyncio
 async def test_valid_until(
-    create_link_factory: dict, client: AsyncClient, db: Database, minutes_shift, expected_status
+    create_link_factory, client: AsyncClient, db: Database, minutes_shift, expected_status
 ):
     """ Check that when valid_until is in past file cannot be downloaded. """
     valid_until = arrow.utcnow().shift(minutes=minutes_shift).isoformat()
-    link_json: dict = await create_link_factory(dict(is_onetime=True, valid_until=valid_until))
+    link_json: dict = await create_link_factory(dict(is_onetime=False, valid_until=valid_until))
     link = link_json["link"]
     assert isinstance(link, str)
 
@@ -101,6 +101,21 @@ async def test_valid_until(
 
     response = await client.get(f"/links/{link}")
     assert response.status_code == expected_status
+
+
+@pytest.mark.asyncio
+async def test_onetime_link(create_link_factory, client: AsyncClient, db: Database):
+    """ Check one time link is deleted after download. """
+    link_json: dict = await create_link_factory(dict(is_onetime=True, valid_until=None))
+    link = link_json["link"]
+    assert isinstance(link, str)
+
+    link_obj = Link.parse_obj(await db.fetch_one(links.select().where(links.c.link == link)))
+    assert link_obj.is_onetime is True
+
+    assert (await client.get(f"/links/{link}")).status_code == 200
+
+    assert (await client.get(f"/links/{link}")).status_code == 404
 
 
 @pytest.mark.asyncio
