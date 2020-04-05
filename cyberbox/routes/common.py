@@ -9,8 +9,8 @@ from pydantic import BaseModel
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
+from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.models import users
 
 ALGORITHM = "HS256"
 
@@ -45,7 +45,7 @@ async def get_current_user(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate access token"
         )
 
-    row = await db.fetch_one(users.select().where(users.c.username == payload.get("sub")))
+    row = await db.fetch_one(orm.users.select().where(orm.users.c.username == payload.get("sub")))
     if row is None:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="User does not exist")
 

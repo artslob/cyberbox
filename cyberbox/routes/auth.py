@@ -10,8 +10,8 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
+from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.models import users
 from cyberbox.routes.common import ALGORITHM, User, get_config, get_current_user, get_db
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -27,7 +27,7 @@ class Token(BaseModel):
 
 
 async def authenticate_user(username, password, db: Database) -> Optional[User]:
-    row = await db.fetch_one(users.select().where(users.c.username == username))
+    row = await db.fetch_one(orm.users.select().where(orm.users.c.username == username))
     if not row or not crypt_context.verify(password, row["hashed_password"]):
         return None
     return User.parse_obj(row)

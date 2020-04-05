@@ -5,7 +5,7 @@ import pytest
 from databases import Database
 from httpx import AsyncClient
 
-from cyberbox.models import users
+from cyberbox import orm
 from cyberbox.routes.auth import crypt_context
 
 
@@ -13,7 +13,7 @@ from cyberbox.routes.auth import crypt_context
 async def create_users(db: Database):
     hashed_password = crypt_context.hash("123")
     await db.execute_many(
-        users.insert(),
+        orm.users.insert(),
         [
             dict(uid=uuid4(), username=username, disabled=disabled, hashed_password=hashed_password)
             for username, disabled in [

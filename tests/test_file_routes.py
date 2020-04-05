@@ -9,7 +9,7 @@ from databases import Database
 from httpx import AsyncClient
 from sqlalchemy import func, select
 
-from cyberbox.models import files
+from cyberbox import orm
 
 
 def simple_files(file, path):
@@ -121,7 +121,7 @@ async def test_file_saved_on_filesystem(files_dir: Path, upload_file: dict, test
 
 @pytest.mark.asyncio
 async def test_db_file_model(upload_file: dict, db: Database):
-    query = files.select().where(files.c.uid == upload_file["uid"])
+    query = orm.files.select().where(orm.files.c.uid == upload_file["uid"])
     row = await db.fetch_one(query)
     expected_name = "test-file.txt"
     username = "test_user"
@@ -167,13 +167,13 @@ async def test_file_delete(
     uid = upload_file["uid"]
     saved_file = files_dir / uid
     assert saved_file.exists()
-    assert await db.execute(select([func.count()]).select_from(files)) == 1
+    assert await db.execute(select([func.count()]).select_from(orm.files)) == 1
 
     response = await client.delete(f"/files/{uid}", headers=headers)
     assert response.status_code == 200
     assert not saved_file.exists()
 
-    assert await db.execute(select([func.count()]).select_from(files)) == 0
+    assert await db.execute(select([func.count()]).select_from(orm.files)) == 0
 
 
 @pytest.mark.asyncio

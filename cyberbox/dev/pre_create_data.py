@@ -4,8 +4,8 @@ import sqlalchemy
 from databases import Database
 from sqlalchemy_utils import create_database, drop_database
 
+from cyberbox import orm
 from cyberbox.asgi import app
-from cyberbox.models import metadata, users
 from cyberbox.routes.auth import crypt_context
 
 
@@ -18,7 +18,7 @@ async def pre_create_data():
 
     drop_database(db_url)
     create_database(db_url)
-    metadata.create_all(engine)
+    orm.metadata.create_all(engine)
 
     await database.connect()
     async with database.transaction():
@@ -28,7 +28,7 @@ async def pre_create_data():
             disabled=False,
             hashed_password=crypt_context.hash("123"),
         )
-        await database.execute(users.insert(values=values))
+        await database.execute(orm.users.insert(values=values))
 
     await database.disconnect()
 

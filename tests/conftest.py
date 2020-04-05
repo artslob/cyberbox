@@ -6,9 +6,8 @@ import pytest
 import sqlalchemy
 from asgi_lifespan import LifespanManager
 
-from cyberbox import const
+from cyberbox import const, orm
 from cyberbox.app import create_app
-from cyberbox.models import metadata
 
 pytest_plugins = ["tests.fixtures.auth", "tests.fixtures.data", "tests.fixtures.files"]
 
@@ -58,9 +57,9 @@ def test_config(create_config: Path, monkeypatch):
 @pytest.fixture(scope="session")
 def create_test_database(database_url: str):
     engine = sqlalchemy.create_engine(database_url)
-    metadata.create_all(engine)
+    orm.metadata.create_all(engine)
     yield
-    metadata.drop_all(engine)
+    orm.metadata.drop_all(engine)
 
 
 @pytest.fixture()

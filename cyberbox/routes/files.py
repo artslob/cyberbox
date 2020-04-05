@@ -11,8 +11,8 @@ from pydantic.main import BaseModel
 from starlette.responses import FileResponse, PlainTextResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
+from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.models import files
 from cyberbox.routes.common import User, get_config, get_current_user, get_db
 
 router = APIRouter()
@@ -31,7 +31,7 @@ async def file_list(
     user: User = Depends(get_current_user), db: Database = Depends(get_db),
 ):
     # TODO improve filter
-    query = files.select().where(files.c.owner == user.username).limit(10)
+    query = orm.files.select().where(orm.files.c.owner == user.username).limit(10)
     return await db.fetch_all(query)
 
 
@@ -49,7 +49,7 @@ async def upload_file(
         content_type=file.content_type,
         created=arrow.utcnow().datetime,
     )
-    await db.execute(files.insert().values(file_model.dict()))
+    await db.execute(orm.files.insert().values(file_model.dict()))
 
     file_path = cfg.files_dir / str(file_model.uid)
     async with aiofiles.open(file_path, "wb") as saved_file:
@@ -65,7 +65,9 @@ async def download_file(
     db: Database = Depends(get_db),
     cfg: Config = Depends(get_config),
 ):
-    query = files.select().where((files.c.owner == user.username) & (files.c.uid == file_uid))
+    query = orm.files.select().where(
+        (orm.files.c.owner == user.username) & (orm.files.c.uid == file_uid)
+    )
     row = await db.fetch_one(query)
     if not row:
         detail = f"File with uuid {str(file_uid)!r} not found"
@@ -83,9 +85,9 @@ async def delete_file(
     cfg: Config = Depends(get_config),
 ):
     query = (
-        files.delete()
-        .where((files.c.owner == user.username) & (files.c.uid == file_uid))
-        .returning(files.c.uid)
+        orm.files.delete()
+        .where((orm.files.c.owner == user.username) & (orm.files.c.uid == file_uid))
+        .returning(orm.files.c.uid)
     )
     result = await db.execute(query)
     if not result:

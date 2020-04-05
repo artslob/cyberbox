@@ -6,7 +6,7 @@ from databases import Database
 from httpx import AsyncClient
 from sqlalchemy import func, select
 
-from cyberbox.models import links
+from cyberbox import orm
 from cyberbox.routes.links import Link
 
 
@@ -52,7 +52,7 @@ def check_link_info(link_info: dict, upload_file: dict):
 
 @pytest.mark.asyncio
 async def test_link_creation(create_link: dict, upload_file: dict, db: Database):
-    assert await db.execute(select([func.count()]).select_from(links)) == 1
+    assert await db.execute(select([func.count()]).select_from(orm.links)) == 1
     check_link_info(create_link, upload_file)
 
 
@@ -79,7 +79,7 @@ async def test_download_file_by_link(
     assert response.text == test_file.read_text()
     assert response.headers["content-disposition"] == f'attachment; filename="test-file.txt"'
 
-    query = select([links.c.visited_count]).where(links.c.link == link)
+    query = select([orm.links.c.visited_count]).where(orm.links.c.link == link)
     assert await db.execute(query) == n
 
 
@@ -96,7 +96,9 @@ async def test_valid_until(
 
     assert link_json["valid_until"] == valid_until
 
-    link_obj = Link.parse_obj(await db.fetch_one(links.select().where(links.c.link == link)))
+    link_obj = Link.parse_obj(
+        await db.fetch_one(orm.links.select().where(orm.links.c.link == link))
+    )
     assert arrow.get(link_obj.valid_until).isoformat() == valid_until
 
     response = await client.get(f"/links/{link}")
@@ -110,7 +112,9 @@ async def test_onetime_link(create_link_factory, client: AsyncClient, db: Databa
     link = link_json["link"]
     assert isinstance(link, str)
 
-    link_obj = Link.parse_obj(await db.fetch_one(links.select().where(links.c.link == link)))
+    link_obj = Link.parse_obj(
+        await db.fetch_one(orm.links.select().where(orm.links.c.link == link))
+    )
     assert link_obj.is_onetime is True
 
     assert (await client.get(f"/links/{link}")).status_code == 200
@@ -129,12 +133,12 @@ async def test_download_by_not_existing_link(create_link: dict, client: AsyncCli
 async def test_delete_link(create_link: dict, client: AsyncClient, logged_user, db: Database):
     username, access_token, headers = logged_user
 
-    assert await db.execute(select([func.count()]).select_from(links)) == 1
+    assert await db.execute(select([func.count()]).select_from(orm.links)) == 1
 
     response = await client.delete(f"/links/{create_link['link']}", headers=headers)
     assert response.status_code == 200
 
-    assert await db.execute(select([func.count()]).select_from(links)) == 0
+    assert await db.execute(select([func.count()]).select_from(orm.links)) == 0
 
 
 @pytest.mark.asyncio
