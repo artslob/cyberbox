@@ -11,7 +11,7 @@ from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.models import FileModel, User
+from cyberbox.models import FileModel, UserModel
 from cyberbox.routes.common import get_config, get_current_user, get_db
 
 router = APIRouter()
@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[FileModel])
 async def file_list(
-    user: User = Depends(get_current_user), db: Database = Depends(get_db),
+    user: UserModel = Depends(get_current_user), db: Database = Depends(get_db),
 ):
     # TODO improve filter
     query = orm.File.select().where(orm.File.c.owner == user.username).limit(10)
@@ -28,7 +28,7 @@ async def file_list(
 
 @router.post("/upload", response_model=FileModel)
 async def upload_file(
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
     db: Database = Depends(get_db),
     cfg: Config = Depends(get_config),
     file: UploadFile = File(...),
@@ -52,7 +52,7 @@ async def upload_file(
 @router.get("/{file_uid}", response_class=FileResponse)
 async def download_file(
     file_uid: UUID,
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
     db: Database = Depends(get_db),
     cfg: Config = Depends(get_config),
 ):
@@ -71,7 +71,7 @@ async def download_file(
 @router.delete("/{file_uid}", response_class=PlainTextResponse)
 async def delete_file(
     file_uid: UUID,
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
     db: Database = Depends(get_db),
     cfg: Config = Depends(get_config),
 ):

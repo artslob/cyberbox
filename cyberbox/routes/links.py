@@ -11,7 +11,7 @@ from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.models import Link, User
+from cyberbox.models import LinkModel, UserModel
 from cyberbox.routes.common import get_config, get_current_user, get_db
 
 router = APIRouter()
@@ -20,11 +20,11 @@ router = APIRouter()
 # TODO link list endpoint
 
 
-@router.post("/{file_uid}", response_model=Link)
+@router.post("/{file_uid}", response_model=LinkModel)
 async def create_link(
     *,
     file_uid: UUID,
-    user: User = Depends(get_current_user),
+    user: UserModel = Depends(get_current_user),
     db: Database = Depends(get_db),
     is_onetime: bool = Body(False),
     valid_until: datetime = Body(None),
@@ -40,7 +40,7 @@ async def create_link(
     if valid_until is not None:
         valid_until = arrow.get(valid_until).datetime
 
-    link = Link(
+    link = LinkModel(
         uid=file_uid,
         link=secrets.token_urlsafe(16),
         is_onetime=is_onetime,
@@ -52,7 +52,7 @@ async def create_link(
     return link
 
 
-@router.get("/{link}/info", response_model=Link)
+@router.get("/{link}/info", response_model=LinkModel)
 async def link_info(link: str, db: Database = Depends(get_db)):
     row = await db.fetch_one(orm.Link.select().where(orm.Link.c.link == link))
     if not row:
@@ -105,7 +105,7 @@ async def download_file_by_link(
 
 @router.delete("/{link}")
 async def delete_link(
-    link: str, db: Database = Depends(get_db), user: User = Depends(get_current_user)
+    link: str, db: Database = Depends(get_db), user: UserModel = Depends(get_current_user)
 ):
     query = (
         orm.Link.delete()

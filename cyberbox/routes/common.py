@@ -8,7 +8,7 @@ from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.models import User
+from cyberbox.models import UserModel
 
 ALGORITHM = "HS256"
 
@@ -29,7 +29,7 @@ async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Database = Depends(get_db),
     cfg: Config = Depends(get_config),
-) -> User:
+) -> UserModel:
     try:
         payload = jwt.decode(token, cfg.secret_key, algorithms=[ALGORITHM])
     except PyJWTError:
@@ -41,7 +41,7 @@ async def get_current_user(
     if row is None:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="User does not exist")
 
-    user = User.parse_obj(row)
+    user = UserModel.parse_obj(row)
     if user.disabled:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
 

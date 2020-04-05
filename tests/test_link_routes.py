@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy import func, select
 
 from cyberbox import orm
-from cyberbox.models import Link
+from cyberbox.models import LinkModel
 
 
 @pytest.mark.asyncio
@@ -96,7 +96,9 @@ async def test_valid_until(
 
     assert link_json["valid_until"] == valid_until
 
-    link_obj = Link.parse_obj(await db.fetch_one(orm.Link.select().where(orm.Link.c.link == link)))
+    link_obj = LinkModel.parse_obj(
+        await db.fetch_one(orm.Link.select().where(orm.Link.c.link == link))
+    )
     assert arrow.get(link_obj.valid_until).isoformat() == valid_until
 
     response = await client.get(f"/link/{link}")
@@ -110,7 +112,9 @@ async def test_onetime_link(create_link_factory, client: AsyncClient, db: Databa
     link = link_json["link"]
     assert isinstance(link, str)
 
-    link_obj = Link.parse_obj(await db.fetch_one(orm.Link.select().where(orm.Link.c.link == link)))
+    link_obj = LinkModel.parse_obj(
+        await db.fetch_one(orm.Link.select().where(orm.Link.c.link == link))
+    )
     assert link_obj.is_onetime is True
 
     assert (await client.get(f"/link/{link}")).status_code == 200

@@ -4,12 +4,12 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class Token(BaseModel):
+class TokenModel(BaseModel):
     access_token: str
     token_type: str
 
 
-class User(BaseModel):
+class UserModel(BaseModel):
     uid: UUID = None
     username: str
     disabled: bool = False
@@ -23,7 +23,7 @@ class FileModel(BaseModel):
     created: datetime
 
 
-class Link(BaseModel):
+class LinkModel(BaseModel):
     uid: UUID
     link: str
     is_onetime: bool
