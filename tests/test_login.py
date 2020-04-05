@@ -33,10 +33,10 @@ async def test_not_existing_user_login(client: AsyncClient, data):
 
 @pytest.mark.asyncio
 async def test_disabled_user_login(create_users, client: AsyncClient):
-    """ Check that disabled user cannot get access token. """
+    """ Check that disabled user can get access token. """
     response = await client.post("/auth/login", data=dict(username="disabled_user", password="123"))
-    assert response.status_code == 403
-    assert response.json() == {"detail": "User is disabled"}
+    assert response.status_code == 200
+    assert "access_token" in response.json()
 
 
 def decode_base64_dict_from_str(string: str) -> dict:

@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import uuid4
 
 import arrow
@@ -20,13 +19,6 @@ router = APIRouter()
 crypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-async def authenticate_user(username, password, db: Database) -> Optional[UserModel]:
-    row = await db.fetch_one(orm.User.select().where(orm.User.c.username == username))
-    if not row or not crypt_context.verify(password, row["hashed_password"]):
-        return None
-    return UserModel.parse_obj(row)
-
-
 def create_access_token(username: str, cfg: Config) -> str:
     exp_in_minutes = cfg.jwt.access_token_expire_minutes
     exp = arrow.utcnow().shift(minutes=exp_in_minutes).datetime
@@ -40,12 +32,12 @@ async def login(
     db: Database = Depends(get_db),
     cfg: Config = Depends(get_config),
 ):
-    user = await authenticate_user(form_data.username, form_data.password, db)
-    if not user:
+    query = orm.User.select().where(orm.User.c.username == form_data.username)
+    row = await db.fetch_one(query)
+    if not row or not crypt_context.verify(form_data.password, row["hashed_password"]):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect user or password")
 
-    if user.disabled:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "User is disabled")
+    user = UserModel.parse_obj(row)
 
     access_token = create_access_token(user.username, cfg)
     return TokenModel(access_token=access_token, token_type="bearer")

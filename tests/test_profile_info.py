@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient
+from starlette import status
 
 
 @pytest.mark.asyncio
@@ -28,3 +29,12 @@ async def test_profile_info_unknown_user(client: AsyncClient, headers: dict, exp
     response = await client.get("auth/profile", headers=headers)
     assert response.status_code == 401
     assert response.json() == expected_details
+
+
+@pytest.mark.asyncio
+async def test_profile_info_disabled_user(client: AsyncClient, disabled_user):
+    username, access_token, headers = disabled_user
+
+    response = await client.get("auth/profile", headers=headers)
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json() == {"detail": "User is disabled"}

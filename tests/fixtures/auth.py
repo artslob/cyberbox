@@ -1,5 +1,33 @@
+from uuid import uuid4
+
+import arrow
 import pytest
+from databases import Database
 from httpx import AsyncClient
+
+from cyberbox import orm
+from cyberbox.routes.auth import crypt_context
+
+
+@pytest.fixture()
+async def create_users(db: Database):
+    hashed_password = crypt_context.hash("123")
+    values = [
+        dict(
+            uid=uuid4(),
+            username=username,
+            disabled=disabled,
+            hashed_password=hashed_password,
+            created=arrow.utcnow().datetime,
+            is_admin=False,
+        )
+        for username, disabled in [
+            ("test_user", False),
+            ("disabled_user", True),
+            ("active_user", False),
+        ]
+    ]
+    await db.execute_many(orm.User.insert(), values)
 
 
 async def login_as(username: str, client: AsyncClient) -> tuple:
@@ -28,3 +56,8 @@ async def logged_user(create_users, client: AsyncClient):
 @pytest.fixture()
 async def active_user(create_users, client: AsyncClient):
     return await login_as("active_user", client)
+
+
+@pytest.fixture()
+async def disabled_user(create_users, client: AsyncClient):
+    return await login_as("disabled_user", client)
