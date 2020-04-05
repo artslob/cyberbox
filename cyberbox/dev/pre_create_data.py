@@ -28,7 +28,7 @@ async def pre_create_data():
             disabled=False,
             hashed_password=crypt_context.hash("123"),
         )
-        await database.execute(orm.users.insert(values=values))
+        await database.execute(orm.User.insert(values=values))
 
     await database.disconnect()
 

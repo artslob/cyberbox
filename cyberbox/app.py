@@ -23,7 +23,7 @@ def create_app() -> FastAPI:
         await database.disconnect()
 
     app.include_router(auth.router, prefix="/auth", tags=["auth"])
-    app.include_router(files.router, prefix="/files", tags=["files"])
-    app.include_router(links.router, prefix="/links", tags=["links"])
+    app.include_router(files.router, prefix="/file", tags=["file"])
+    app.include_router(links.router, prefix="/link", tags=["link"])
 
     return app

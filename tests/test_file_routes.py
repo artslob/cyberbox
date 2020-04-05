@@ -67,7 +67,7 @@ async def test_file_upload_with_file_factory(
 
     with test_file.open() as f:
         files_dict = files_factory(f, test_file)
-        response = await client.post("/files/upload", files=files_dict, headers=headers)
+        response = await client.post("/file/upload", files=files_dict, headers=headers)
 
     assert response.status_code == 200
 
@@ -78,7 +78,7 @@ async def test_file_upload_with_file_factory(
         upload_result, expected_name=expected_name, expected_content_type=expected_content_type
     )
 
-    response = await client.get("/files/", headers=headers)
+    response = await client.get("/file/", headers=headers)
     assert response.status_code == 200
 
     file_list = response.json()
@@ -100,7 +100,7 @@ async def test_file_upload_result(upload_file: dict):
 async def test_file_list(logged_user, upload_file: dict, client: AsyncClient):
     """ Check json response in file list. """
     username, access_token, headers = logged_user
-    response = await client.get("/files/", headers=headers)
+    response = await client.get("/file/", headers=headers)
     assert response.status_code == 200
 
     file_list = response.json()
@@ -121,7 +121,7 @@ async def test_file_saved_on_filesystem(files_dir: Path, upload_file: dict, test
 
 @pytest.mark.asyncio
 async def test_db_file_model(upload_file: dict, db: Database):
-    query = orm.files.select().where(orm.files.c.uid == upload_file["uid"])
+    query = orm.File.select().where(orm.File.c.uid == upload_file["uid"])
     row = await db.fetch_one(query)
     expected_name = "test-file.txt"
     username = "test_user"
@@ -143,7 +143,7 @@ async def test_file_download(logged_user, client: AsyncClient, upload_file: dict
     """ Check file can be downloaded and content is valid. """
     username, access_token, headers = logged_user
     uid = upload_file["uid"]
-    response = await client.get(f"/files/{uid}", headers=headers)
+    response = await client.get(f"/file/{uid}", headers=headers)
     assert response.status_code == 200
     assert response.text == test_file.read_text()
     assert response.headers["content-disposition"] == f'attachment; filename="test-file.txt"'
@@ -154,7 +154,7 @@ async def test_file_download_by_not_owner(active_user, client: AsyncClient, uplo
     """ Check that not owner user cannot download file. """
     username, access_token, headers = active_user
     uid = upload_file["uid"]
-    response = await client.get(f"/files/{uid}", headers=headers)
+    response = await client.get(f"/file/{uid}", headers=headers)
     assert response.status_code == 404
 
 
@@ -167,13 +167,13 @@ async def test_file_delete(
     uid = upload_file["uid"]
     saved_file = files_dir / uid
     assert saved_file.exists()
-    assert await db.execute(select([func.count()]).select_from(orm.files)) == 1
+    assert await db.execute(select([func.count()]).select_from(orm.File)) == 1
 
-    response = await client.delete(f"/files/{uid}", headers=headers)
+    response = await client.delete(f"/file/{uid}", headers=headers)
     assert response.status_code == 200
     assert not saved_file.exists()
 
-    assert await db.execute(select([func.count()]).select_from(orm.files)) == 0
+    assert await db.execute(select([func.count()]).select_from(orm.File)) == 0
 
 
 @pytest.mark.asyncio
@@ -184,6 +184,6 @@ async def test_file_delete_by_not_owner(
     username, access_token, headers = active_user
     uid = upload_file["uid"]
     saved_file = files_dir / uid
-    response = await client.delete(f"/files/{uid}", headers=headers)
+    response = await client.delete(f"/file/{uid}", headers=headers)
     assert response.status_code == 404
     assert saved_file.exists()

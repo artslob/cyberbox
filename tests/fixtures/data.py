@@ -13,7 +13,7 @@ from cyberbox.routes.auth import crypt_context
 async def create_users(db: Database):
     hashed_password = crypt_context.hash("123")
     await db.execute_many(
-        orm.users.insert(),
+        orm.User.insert(),
         [
             dict(uid=uuid4(), username=username, disabled=disabled, hashed_password=hashed_password)
             for username, disabled in [
@@ -36,6 +36,6 @@ async def create_files(logged_user, active_user, client: AsyncClient, tmp_path: 
             test_file.write_text(uid)
 
             with test_file.open() as f:
-                response = await client.post("/files/upload", files=dict(file=f), headers=headers)
+                response = await client.post("/file/upload", files=dict(file=f), headers=headers)
 
             assert response.status_code == 200

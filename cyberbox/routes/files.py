@@ -31,7 +31,7 @@ async def file_list(
     user: User = Depends(get_current_user), db: Database = Depends(get_db),
 ):
     # TODO improve filter
-    query = orm.files.select().where(orm.files.c.owner == user.username).limit(10)
+    query = orm.File.select().where(orm.File.c.owner == user.username).limit(10)
     return await db.fetch_all(query)
 
 
@@ -49,7 +49,7 @@ async def upload_file(
         content_type=file.content_type,
         created=arrow.utcnow().datetime,
     )
-    await db.execute(orm.files.insert().values(file_model.dict()))
+    await db.execute(orm.File.insert().values(file_model.dict()))
 
     file_path = cfg.files_dir / str(file_model.uid)
     async with aiofiles.open(file_path, "wb") as saved_file:
@@ -65,8 +65,8 @@ async def download_file(
     db: Database = Depends(get_db),
     cfg: Config = Depends(get_config),
 ):
-    query = orm.files.select().where(
-        (orm.files.c.owner == user.username) & (orm.files.c.uid == file_uid)
+    query = orm.File.select().where(
+        (orm.File.c.owner == user.username) & (orm.File.c.uid == file_uid)
     )
     row = await db.fetch_one(query)
     if not row:
@@ -85,9 +85,9 @@ async def delete_file(
     cfg: Config = Depends(get_config),
 ):
     query = (
-        orm.files.delete()
-        .where((orm.files.c.owner == user.username) & (orm.files.c.uid == file_uid))
-        .returning(orm.files.c.uid)
+        orm.File.delete()
+        .where((orm.File.c.owner == user.username) & (orm.File.c.uid == file_uid))
+        .returning(orm.File.c.uid)
     )
     result = await db.execute(query)
     if not result:

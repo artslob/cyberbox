@@ -27,7 +27,7 @@ class Token(BaseModel):
 
 
 async def authenticate_user(username, password, db: Database) -> Optional[User]:
-    row = await db.fetch_one(orm.users.select().where(orm.users.c.username == username))
+    row = await db.fetch_one(orm.User.select().where(orm.User.c.username == username))
     if not row or not crypt_context.verify(password, row["hashed_password"]):
         return None
     return User.parse_obj(row)

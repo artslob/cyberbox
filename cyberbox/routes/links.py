@@ -39,7 +39,7 @@ async def create_link(
     valid_until: datetime = Body(None),
 ):
     query = select(
-        [exists().where((orm.files.c.owner == user.username) & (orm.files.c.uid == file_uid))]
+        [exists().where((orm.File.c.owner == user.username) & (orm.File.c.uid == file_uid))]
     )
     is_exist = await db.execute(query)
     if not is_exist:
@@ -57,13 +57,13 @@ async def create_link(
         visited_count=0,
         valid_until=valid_until,
     )
-    await db.execute(orm.links.insert().values(link.dict()))
+    await db.execute(orm.Link.insert().values(link.dict()))
     return link
 
 
 @router.get("/{link}/info", response_model=Link)
 async def link_info(link: str, db: Database = Depends(get_db)):
-    row = await db.fetch_one(orm.links.select().where(orm.links.c.link == link))
+    row = await db.fetch_one(orm.Link.select().where(orm.Link.c.link == link))
     if not row:
         detail = f"Link with value {link!r} does not exist"
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=detail)
@@ -78,19 +78,19 @@ async def download_file_by_link(
     not_found = HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Link does not exist")
 
     query = (
-        select([orm.files, orm.links.c.is_onetime])
-        .where(orm.links.c.link == link)
+        select([orm.File, orm.Link.c.is_onetime])
+        .where(orm.Link.c.link == link)
         .where(
-            orm.links.c.valid_until.is_(None) | (orm.links.c.valid_until >= arrow.utcnow().datetime)
+            orm.Link.c.valid_until.is_(None) | (orm.Link.c.valid_until >= arrow.utcnow().datetime)
         )
-        .select_from(orm.files.join(orm.links))
+        .select_from(orm.File.join(orm.Link))
     )
     row = await db.fetch_one(query)
     if not row:
         raise not_found
 
     is_onetime = False
-    if row[orm.links.c.is_onetime]:
+    if row[orm.Link.c.is_onetime]:
         is_onetime = True
         # set lock on row
         row = await db.fetch_one(query.with_for_update())
@@ -99,14 +99,14 @@ async def download_file_by_link(
         raise not_found
 
     if is_onetime:
-        delete = orm.links.delete().where(orm.links.c.link == link)
+        delete = orm.Link.delete().where(orm.Link.c.link == link)
         await db.execute(delete)
     else:
-        increment = orm.links.update().where(orm.links.c.link == link)
-        await db.execute(increment, dict(visited_count=orm.links.c.visited_count + 1))
+        increment = orm.Link.update().where(orm.Link.c.link == link)
+        await db.execute(increment, dict(visited_count=orm.Link.c.visited_count + 1))
 
-    file_path = cfg.files_dir / str(row[orm.files.c.uid])
-    return FileResponse(str(file_path), filename=row[orm.files.c.filename])
+    file_path = cfg.files_dir / str(row[orm.File.c.uid])
+    return FileResponse(str(file_path), filename=row[orm.File.c.filename])
 
 
 # TODO download by one time link
@@ -117,12 +117,12 @@ async def delete_link(
     link: str, db: Database = Depends(get_db), user: User = Depends(get_current_user)
 ):
     query = (
-        orm.links.delete()
-        .where(orm.links.c.link == link)
+        orm.Link.delete()
+        .where(orm.Link.c.link == link)
         .where(
-            orm.links.c.uid.in_(select([orm.files.c.uid]).where(orm.files.c.owner == user.username))
+            orm.Link.c.uid.in_(select([orm.File.c.uid]).where(orm.File.c.owner == user.username))
         )
-        .returning(orm.links.c.link)
+        .returning(orm.Link.c.link)
     )
     deleted_link = await db.execute(query)
     if deleted_link != link:

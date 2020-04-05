@@ -45,7 +45,7 @@ async def get_current_user(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate access token"
         )
 
-    row = await db.fetch_one(orm.users.select().where(orm.users.c.username == payload.get("sub")))
+    row = await db.fetch_one(orm.User.select().where(orm.User.c.username == payload.get("sub")))
     if row is None:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="User does not exist")
 

@@ -15,7 +15,7 @@ async def upload_file(logged_user, client, test_file):
     username, access_token, headers = logged_user
 
     with test_file.open() as f:
-        response = await client.post("/files/upload", files=dict(file=f), headers=headers)
+        response = await client.post("/file/upload", files=dict(file=f), headers=headers)
 
     assert response.status_code == 200
     return response.json()

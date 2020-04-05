@@ -7,8 +7,8 @@ from sqlalchemy.sql import expression
 
 metadata = sqlalchemy.MetaData()
 
-users = sqlalchemy.Table(
-    "users",
+User = sqlalchemy.Table(
+    "user",
     metadata,
     Column("uid", UUID(), default=uuid4, primary_key=True),
     Column("username", String(), nullable=False, unique=True),
@@ -16,20 +16,20 @@ users = sqlalchemy.Table(
     Column("hashed_password", String(), nullable=False),
 )
 
-files = sqlalchemy.Table(
-    "files",
+File = sqlalchemy.Table(
+    "file",
     metadata,
     Column("uid", UUID(), primary_key=True),
-    Column("owner", String(), ForeignKey(users.c.username), nullable=False),
+    Column("owner", String(), ForeignKey(User.c.username), nullable=False),
     Column("filename", String(), nullable=False),
     Column("content_type", String(), nullable=False),
     Column("created", TIMESTAMP(timezone=True), nullable=False),
 )
 
-links = sqlalchemy.Table(
-    "links",
+Link = sqlalchemy.Table(
+    "link",
     metadata,
-    Column("uid", UUID(), ForeignKey(files.c.uid)),
+    Column("uid", UUID(), ForeignKey(File.c.uid)),
     Column("link", String(), unique=True, nullable=False),
     Column(
         "is_onetime", Boolean(), default=False, server_default=expression.false(), nullable=False
