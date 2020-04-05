@@ -10,8 +10,6 @@ from cyberbox import orm
 from cyberbox.config import Config
 from cyberbox.models import UserModel
 
-ALGORITHM = "HS256"
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
@@ -31,7 +29,7 @@ async def get_current_user(
     cfg: Config = Depends(get_config),
 ) -> UserModel:
     try:
-        payload = jwt.decode(token, cfg.secret_key, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, cfg.secret_key, algorithms=[cfg.jwt_algorithm])
     except PyJWTError:
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate access token"

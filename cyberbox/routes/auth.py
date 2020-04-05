@@ -11,7 +11,7 @@ from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.dependency import ALGORITHM, get_config, get_current_user, get_db
+from cyberbox.dependency import get_config, get_current_user, get_db
 from cyberbox.models import TokenModel, UserModel
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -28,10 +28,10 @@ async def authenticate_user(username, password, db: Database) -> Optional[UserMo
     return UserModel.parse_obj(row)
 
 
-def create_access_token(data: dict, secret_key: str) -> str:
+def create_access_token(data: dict, secret_key: str, algorithm: str) -> str:
     data = deepcopy(data)
     data["exp"] = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    return jwt.encode(data, secret_key, ALGORITHM)
+    return jwt.encode(data, secret_key, algorithm)
 
 
 @router.post("/login", response_model=TokenModel)
@@ -47,7 +47,7 @@ async def login(
     if user.disabled:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
 
-    token = create_access_token(dict(sub=user.username), cfg.secret_key)
+    token = create_access_token(dict(sub=user.username), cfg.secret_key, cfg.jwt_algorithm)
     return TokenModel(access_token=token, token_type="bearer")
 
 

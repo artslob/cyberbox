@@ -17,6 +17,7 @@ class DatabaseConfig(BaseModel):
 class Config(BaseModel):
     environment: Env
     secret_key: str = Field(..., min_length=10)
+    jwt_algorithm: str = "HS256"
     database: DatabaseConfig
     files_dir: DirectoryPath
 
