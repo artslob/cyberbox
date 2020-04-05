@@ -7,23 +7,18 @@ from databases import Database
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
-from pydantic import BaseModel
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.routes.common import ALGORITHM, User, get_config, get_current_user, get_db
+from cyberbox.models import Token, User
+from cyberbox.routes.common import ALGORITHM, get_config, get_current_user, get_db
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 router = APIRouter()
 
 crypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
 
 
 async def authenticate_user(username, password, db: Database) -> Optional[User]:

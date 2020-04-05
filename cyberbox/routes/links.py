@@ -5,25 +5,16 @@ from uuid import UUID
 import arrow
 from databases import Database
 from fastapi import APIRouter, Body, Depends, HTTPException
-from pydantic.main import BaseModel
 from sqlalchemy import exists, select
 from starlette.responses import FileResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.routes.common import User, get_config, get_current_user, get_db
+from cyberbox.models import Link, User
+from cyberbox.routes.common import get_config, get_current_user, get_db
 
 router = APIRouter()
-
-
-class Link(BaseModel):
-    uid: UUID
-    link: str
-    is_onetime: bool
-    created: datetime
-    visited_count: int
-    valid_until: datetime = None
 
 
 # TODO link list endpoint

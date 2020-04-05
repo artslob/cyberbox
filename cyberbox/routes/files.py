@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 from uuid import UUID, uuid4
 
@@ -7,23 +6,15 @@ import arrow
 from databases import Database
 from fastapi import Depends, File, HTTPException, UploadFile
 from fastapi.routing import APIRouter
-from pydantic.main import BaseModel
 from starlette.responses import FileResponse, PlainTextResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.routes.common import User, get_config, get_current_user, get_db
+from cyberbox.models import FileModel, User
+from cyberbox.routes.common import get_config, get_current_user, get_db
 
 router = APIRouter()
-
-
-class FileModel(BaseModel):
-    uid: UUID
-    owner: str
-    filename: str
-    content_type: str
-    created: datetime
 
 
 @router.get("/", response_model=List[FileModel])

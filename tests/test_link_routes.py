@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy import func, select
 
 from cyberbox import orm
-from cyberbox.routes.links import Link
+from cyberbox.models import Link
 
 
 @pytest.mark.asyncio

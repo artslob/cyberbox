@@ -1,26 +1,18 @@
-from uuid import UUID
-
 import jwt
 from databases import Database
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwt import PyJWTError
-from pydantic import BaseModel
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from cyberbox import orm
 from cyberbox.config import Config
+from cyberbox.models import User
 
 ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-
-
-class User(BaseModel):
-    uid: UUID = None
-    username: str
-    disabled: bool = False
 
 
 async def get_db(request: Request):
