@@ -14,6 +14,7 @@ User = sqlalchemy.Table(
     Column("username", String(), nullable=False, unique=True),
     Column("disabled", Boolean(), nullable=False, default=False, server_default=expression.false()),
     Column("hashed_password", String(), nullable=False),
+    Column("is_admin", Boolean(), server_default=expression.false(), nullable=False),
     Column("created", TIMESTAMP(timezone=True), nullable=False),
 )
 

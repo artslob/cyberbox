@@ -20,6 +20,7 @@ async def create_users(db: Database):
             disabled=disabled,
             hashed_password=hashed_password,
             created=arrow.utcnow().datetime,
+            is_admin=False,
         )
         for username, disabled in [
             ("test_user", False),

@@ -32,6 +32,7 @@ async def create_data(db: Database):
         disabled=False,
         hashed_password=crypt_context.hash("123"),
         created=arrow.utcnow().datetime,
+        is_admin=True,
     )
     await db.execute(orm.User.insert(values=values))
 

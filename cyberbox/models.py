@@ -10,10 +10,11 @@ class TokenModel(BaseModel):
 
 
 class UserModel(BaseModel):
-    uid: UUID = None
+    uid: UUID
     username: str
     disabled: bool = False
     created: datetime
+    is_admin: bool
 
 
 class FileModel(BaseModel):
