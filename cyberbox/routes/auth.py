@@ -1,4 +1,3 @@
-from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -14,8 +13,6 @@ from cyberbox.config import Config
 from cyberbox.dependency import get_config, get_current_user, get_db
 from cyberbox.models import TokenModel, UserModel
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
 router = APIRouter()
 
 crypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -28,10 +25,10 @@ async def authenticate_user(username, password, db: Database) -> Optional[UserMo
     return UserModel.parse_obj(row)
 
 
-def create_access_token(data: dict, secret_key: str, algorithm: str) -> str:
-    data = deepcopy(data)
-    data["exp"] = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    return jwt.encode(data, secret_key, algorithm)
+def create_access_token(username: str, cfg: Config) -> str:
+    exp = datetime.utcnow() + timedelta(minutes=cfg.jwt.access_token_expire_minutes)
+    data = dict(sub=username, exp=exp)
+    return jwt.encode(data, cfg.jwt.secret_key, cfg.jwt.algorithm)
 
 
 @router.post("/login", response_model=TokenModel)
@@ -47,13 +44,13 @@ async def login(
     if user.disabled:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
 
-    token = create_access_token(dict(sub=user.username), cfg.secret_key, cfg.jwt_algorithm)
-    return TokenModel(access_token=token, token_type="bearer")
+    access_token = create_access_token(user.username, cfg)
+    return TokenModel(access_token=access_token, token_type="bearer")
 
 
 # TODO register
 
 
 @router.get("/profile", response_model=UserModel)
-async def profile(current_user: UserModel = Depends(get_current_user)):
+async def profile(current_user: UserModel = Depends(get_current_user)) -> UserModel:
     return current_user

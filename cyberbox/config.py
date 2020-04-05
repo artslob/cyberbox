@@ -14,10 +14,15 @@ class DatabaseConfig(BaseModel):
     force_rollback: bool = False
 
 
+class JwtConfig(BaseModel):
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
+    secret_key: str = Field(..., min_length=10)
+
+
 class Config(BaseModel):
     environment: Env
-    secret_key: str = Field(..., min_length=10)
-    jwt_algorithm: str = "HS256"
+    jwt: JwtConfig
     database: DatabaseConfig
     files_dir: DirectoryPath
 

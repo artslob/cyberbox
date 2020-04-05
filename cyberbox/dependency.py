@@ -29,7 +29,7 @@ async def get_current_user(
     cfg: Config = Depends(get_config),
 ) -> UserModel:
     try:
-        payload = jwt.decode(token, cfg.secret_key, algorithms=[cfg.jwt_algorithm])
+        payload = jwt.decode(token, cfg.jwt.secret_key, algorithms=[cfg.jwt.algorithm])
     except PyJWTError:
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate access token"

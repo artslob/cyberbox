@@ -43,7 +43,8 @@ def test_config(config_factory, env_value, force_rollback, expectation, files_di
     config_factory(
         f"""
     environment: {env_value}
-    secret_key: '02928b262b416dca50816d10162151ef0af0f625adb47d73a1526a3630ca8f1f'
+    jwt:
+        secret_key: '02928b262b416dca50816d10162151ef0af0f625adb47d73a1526a3630ca8f1f'
     database:
         url: postgresql://user:pass@localhost:1234
         force_rollback: {force_rollback}
