@@ -1,12 +1,14 @@
 from typing import Optional
+from uuid import uuid4
 
 import arrow
 import jwt
 from databases import Database
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
-from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
+from sqlalchemy import exists, select
+from starlette import status
 
 from cyberbox import orm
 from cyberbox.config import Config
@@ -40,16 +42,41 @@ async def login(
 ):
     user = await authenticate_user(form_data.username, form_data.password, db)
     if not user:
-        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect user or password")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect user or password")
 
     if user.disabled:
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "User is disabled")
 
     access_token = create_access_token(user.username, cfg)
     return TokenModel(access_token=access_token, token_type="bearer")
 
 
-# TODO register
+@router.post("/register")
+async def register(
+    db: Database = Depends(get_db),
+    username: str = Form(..., min_length=3),
+    password1: str = Form(..., min_length=3),
+    password2: str = Form(..., min_length=3),
+):
+    query = select([exists().where(orm.User.c.username == username)])
+    is_exist = await db.execute(query)
+
+    if is_exist:
+        detail = f"user with username {username!r} already exists"
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail)
+
+    if password1 != password2:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "submitted passwords are not equal")
+
+    values = dict(
+        uid=uuid4(),
+        username=username,
+        disabled=True,  # TODO: config param 'disabled_by_default'
+        hashed_password=crypt_context.hash(password1),
+        created=arrow.utcnow().datetime,
+        is_admin=False,
+    )
+    await db.execute(orm.User.insert(values=values))
 
 
 @router.get("/profile", response_model=UserModel)
