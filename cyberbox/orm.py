@@ -14,6 +14,7 @@ User = sqlalchemy.Table(
     Column("username", String(), nullable=False, unique=True),
     Column("disabled", Boolean(), nullable=False, default=False, server_default=expression.false()),
     Column("hashed_password", String(), nullable=False),
+    Column("created", TIMESTAMP(timezone=True), nullable=False),
 )
 
 File = sqlalchemy.Table(

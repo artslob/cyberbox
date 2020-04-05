@@ -1,5 +1,6 @@
 import asyncio
 
+import arrow
 import sqlalchemy
 from databases import Database
 from sqlalchemy_utils import create_database, drop_database
@@ -32,6 +33,7 @@ async def create_data(db: Database):
         username="qwe",
         disabled=False,
         hashed_password=crypt_context.hash("123"),
+        created=arrow.utcnow().datetime,
     )
     await db.execute(orm.User.insert(values=values))
 

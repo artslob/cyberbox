@@ -13,6 +13,7 @@ class UserModel(BaseModel):
     uid: UUID = None
     username: str
     disabled: bool = False
+    created: datetime
 
 
 class FileModel(BaseModel):
