@@ -10,8 +10,9 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
+from cyberbox.config import Config
 from cyberbox.models import users
-from cyberbox.routes.common import ALGORITHM, SECRET_KEY, User, get_current_user, get_db
+from cyberbox.routes.common import ALGORITHM, User, get_config, get_current_user, get_db
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -32,14 +33,18 @@ async def authenticate_user(username, password, db: Database) -> Optional[User]:
     return User.parse_obj(row)
 
 
-def create_access_token(data: dict):
+def create_access_token(data: dict, secret_key: str) -> str:
     data = deepcopy(data)
     data["exp"] = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    return jwt.encode(data, SECRET_KEY, ALGORITHM)
+    return jwt.encode(data, secret_key, ALGORITHM)
 
 
 @router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Database = Depends(get_db)):
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Database = Depends(get_db),
+    cfg: Config = Depends(get_config),
+):
     user = await authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Incorrect user or password")
@@ -47,7 +52,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Database =
     if user.disabled:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
 
-    token = create_access_token(dict(sub=user.username))
+    token = create_access_token(dict(sub=user.username), cfg.secret_key)
     return Token(access_token=token, token_type="bearer")
 
 

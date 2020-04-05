@@ -40,6 +40,7 @@ def create_config(tmp_path, database_url: str, files_dir: Path) -> Path:
     config.write_text(
         f"""
     environment: 'test'
+    secret_key: '3256963ad0ec2ea3ef70b5ca2a6e1c95595cf489ff2930f900f1b3493eaf1a0f'
     database:
         url: "{database_url}"
         force_rollback: true

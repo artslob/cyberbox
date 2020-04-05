@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Callable
 
 import yaml
-from pydantic import BaseModel, DirectoryPath, PostgresDsn, root_validator
+from pydantic import BaseModel, DirectoryPath, Field, PostgresDsn, root_validator
 
 from cyberbox.const import CONFIG_ENV_NAME
 from cyberbox.env import Env
@@ -16,6 +16,7 @@ class DatabaseConfig(BaseModel):
 
 class Config(BaseModel):
     environment: Env
+    secret_key: str = Field(..., min_length=10)
     database: DatabaseConfig
     files_dir: DirectoryPath
 

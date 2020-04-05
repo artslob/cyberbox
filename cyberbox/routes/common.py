@@ -9,9 +9,9 @@ from pydantic import BaseModel
 from starlette.requests import Request
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
+from cyberbox.config import Config
 from cyberbox.models import users
 
-SECRET_KEY = "55aeab38-2e3d-490d-bcdb-b16cd303ef1f"
 ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -29,15 +29,17 @@ async def get_db(request: Request):
         yield db
 
 
-async def get_config(request: Request):
+async def get_config(request: Request) -> Config:
     return request.app.state.cfg
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Database = Depends(get_db)
+    token: str = Depends(oauth2_scheme),
+    db: Database = Depends(get_db),
+    cfg: Config = Depends(get_config),
 ) -> User:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, cfg.secret_key, algorithms=[ALGORITHM])
     except PyJWTError:
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate access token"

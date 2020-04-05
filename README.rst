@@ -40,13 +40,20 @@ no need to call ``poetry run`` every time.
 Running backend
 ***************
 
-Create config file and provide path to it in ``CYBERBOX_CONFIG_FILE`` variable:
+Create config file. Example is ``configs/config-dev-example.yaml``. Validation can be found in
+``cyberbox/config.py`` file.
+
+Do **not forget to change secret** key! Use following command to generate new one::
+
+    openssl rand -hex 32
+
+Provide path to config it in ``CYBERBOX_CONFIG_FILE`` variable (also you can create copy of
+``export-vars-example.sh`` and source it):
 
 .. code-block:: bash
 
     export CYBERBOX_CONFIG_FILE="$(pwd)/configs/config-dev.yaml"
-    # optional step
-    python cyberbox/dev/pre_create_data.py
+    python cyberbox/dev/pre_create_data.py  # optional step
     uvicorn 'cyberbox.asgi:app' --reload
 
 Then go to http://127.0.0.1:8000.

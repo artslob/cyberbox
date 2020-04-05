@@ -1,4 +1,5 @@
 environment: 'dev'
+secret_key: 'ec59f497568a15e12ca17925e0000eb6c4cc38ce791aea902ff6e1ad625d9e4c'
 database:
   url: "postgresql://devuser:devpass@localhost:5432/cyberbox-db"
 files_dir: '/home/artslob/tmp/cyberbox-dev-files'
