@@ -16,7 +16,7 @@ class DatabaseConfig(BaseModel):
 
 class JwtConfig(BaseModel):
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
+    access_token_expire_minutes: int = Field(60, gt=0)
     secret_key: str = Field(..., min_length=10)
 
 

@@ -1,6 +1,7 @@
 import base64
 import json
 
+import arrow
 import pytest
 from httpx import AsyncClient
 
@@ -58,6 +59,15 @@ def test_access_token(logged_user):
     payload = decode_base64_dict_from_str(parts[1])
 
     assert header == {"alg": "HS256", "typ": "JWT"}
-    assert set(payload.keys()) == {"sub", "exp"}
-    assert isinstance(payload["exp"], int)  # TODO encode datetime with timezone as str
+    assert set(payload.keys()) == {"sub", "exp", "iat"}
     assert payload["sub"] == username
+
+    now = arrow.utcnow()
+
+    exp = payload["exp"]
+    assert isinstance(exp, int)
+    assert now.shift(minutes=59).timestamp <= exp <= now.shift(minutes=61).timestamp
+
+    iat = payload["iat"]
+    assert isinstance(iat, int)
+    assert now.shift(minutes=-1).timestamp <= iat <= now.shift(minutes=1).timestamp

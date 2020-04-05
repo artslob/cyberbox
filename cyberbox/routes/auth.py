@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta
 from typing import Optional
 
+import arrow
 import jwt
 from databases import Database
 from fastapi import APIRouter, Depends, HTTPException
@@ -26,8 +26,9 @@ async def authenticate_user(username, password, db: Database) -> Optional[UserMo
 
 
 def create_access_token(username: str, cfg: Config) -> str:
-    exp = datetime.utcnow() + timedelta(minutes=cfg.jwt.access_token_expire_minutes)
-    data = dict(sub=username, exp=exp)
+    exp_in_minutes = cfg.jwt.access_token_expire_minutes
+    exp = arrow.utcnow().shift(minutes=exp_in_minutes).datetime
+    data = dict(sub=username, exp=exp, iat=arrow.utcnow().datetime)
     return jwt.encode(data, cfg.jwt.secret_key, cfg.jwt.algorithm)
 
 
