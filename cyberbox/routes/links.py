@@ -11,8 +11,8 @@ from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox import orm
 from cyberbox.config import Config
+from cyberbox.dependency import get_config, get_current_user, get_db
 from cyberbox.models import LinkModel, UserModel
-from cyberbox.routes.common import get_config, get_current_user, get_db
 
 router = APIRouter()
 
@@ -98,9 +98,6 @@ async def download_file_by_link(
 
     file_path = cfg.files_dir / str(row[orm.File.c.uid])
     return FileResponse(str(file_path), filename=row[orm.File.c.filename])
-
-
-# TODO download by one time link
 
 
 @router.delete("/{link}")

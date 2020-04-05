@@ -11,8 +11,8 @@ from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox import orm
 from cyberbox.config import Config
+from cyberbox.dependency import get_config, get_current_user, get_db
 from cyberbox.models import FileModel, UserModel
-from cyberbox.routes.common import get_config, get_current_user, get_db
 
 router = APIRouter()
 

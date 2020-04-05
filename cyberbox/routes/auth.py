@@ -11,8 +11,8 @@ from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from cyberbox import orm
 from cyberbox.config import Config
+from cyberbox.dependency import ALGORITHM, get_config, get_current_user, get_db
 from cyberbox.models import TokenModel, UserModel
-from cyberbox.routes.common import ALGORITHM, get_config, get_current_user, get_db
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -51,9 +51,7 @@ async def login(
     return TokenModel(access_token=token, token_type="bearer")
 
 
-@router.get("/logout")
-async def logout():
-    return "todo logout"
+# TODO register
 
 
 @router.get("/profile", response_model=UserModel)
