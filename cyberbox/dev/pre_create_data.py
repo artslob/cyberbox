@@ -26,8 +26,6 @@ async def pre_create_data():
 
 
 async def create_data(db: Database):
-    # TODO add test on this method
-
     values = dict(
         uid="b3b4a8a3-d179-4f10-808d-12980175beb0",
         username="qwe",
