@@ -22,10 +22,18 @@ def create_admin(username: str, password: str):
     """ Creates superuser with given username and password. """
     from cyberbox.asgi import app
 
-    asyncio.run(create_superuser(app.state.db, username, password))
+    admin = asyncio.run(_create_admin(app.state.db, username, password))
+    click.echo(f"created admin with username {username!r}, uuid {str(admin.uid)!r}.")
 
 
-async def create_superuser(db: Database, username: str, password: str):
+async def _create_admin(db: Database, username: str, password: str) -> UserModel:
+    # split on separate funcs for testing
+    async with db as db:
+        async with db.transaction():
+            return await __create_admin(db, username, password)
+
+
+async def __create_admin(db: Database, username: str, password: str) -> UserModel:
     admin = UserModel(
         uid=uuid4(),
         username=username,
@@ -33,12 +41,11 @@ async def create_superuser(db: Database, username: str, password: str):
         created=arrow.utcnow().datetime,
         is_admin=True,
     )
-    query = orm.User.insert().values(admin.dict(), hashed_password=crypt_context.hash(password))
-    async with db:
-        async with db.transaction():
-            await db.execute(query)
 
-    click.echo(f"created admin with username {username!r}, uuid {str(admin.uid)!r}.")
+    query = orm.User.insert().values(admin.dict(), hashed_password=crypt_context.hash(password))
+    await db.execute(query)
+
+    return admin
 
 
 if __name__ == "__main__":
