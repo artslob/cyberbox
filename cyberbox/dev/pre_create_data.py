@@ -1,24 +1,20 @@
 import asyncio
 
 import arrow
-import sqlalchemy
 from databases import Database
-from sqlalchemy_utils import create_database, drop_database
 
 from cyberbox import orm
 from cyberbox.routes.auth import crypt_context
 
 
 async def pre_create_data():
+    """
+    Create some data for development purposes.
+    Upgrade database using migration before running this script.
+    """
     from cyberbox.asgi import app
 
     db: Database = app.state.db
-    db_url = app.state.cfg.database.url
-    engine = sqlalchemy.create_engine(db_url)
-
-    drop_database(db_url)
-    create_database(db_url)
-    orm.metadata.create_all(engine)
 
     async with db:
         async with db.transaction():
