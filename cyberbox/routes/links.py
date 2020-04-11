@@ -4,20 +4,32 @@ from uuid import UUID
 
 import arrow
 from databases import Database
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy import exists, select
 from starlette.responses import FileResponse
 from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.dependency import get_config, get_current_user, get_db
-from cyberbox.models import LinkModel, UserModel
+from cyberbox.dependency import get_config, get_current_user, get_db, get_filter_params
+from cyberbox.models import FilterParams, LinkModel, Page, UserModel
+from cyberbox.pagination import pagination
 
 router = APIRouter()
 
 
-# TODO link list endpoint
+@router.get("/", response_model=Page[LinkModel])
+async def link_list(
+    user: UserModel = Depends(get_current_user),
+    db: Database = Depends(get_db),
+    params: FilterParams = Depends(get_filter_params),
+    file_uid: UUID = Query(None, description="Optional filter by file"),
+):
+    join = orm.Link.join(orm.File)
+    query = orm.Link.select().select_from(join).where(orm.File.c.owner == user.username)
+    if file_uid is not None:
+        query = query.where(orm.Link.c.uid == file_uid)
+    return await pagination(query, orm.Link, Page[LinkModel], db, params)
 
 
 @router.post("/{file_uid}", response_model=LinkModel)

@@ -40,6 +40,8 @@ DataT = TypeVar("DataT")
 
 
 class Page(GenericModel, Generic[DataT]):
+    """ Page model. """
+
     items: List[DataT]
     total: int
     pages: int
