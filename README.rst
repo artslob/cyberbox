@@ -49,6 +49,7 @@ Cyberbox - REST API для  файлохранилища с возможност
 * Создание админа через коммандную оболочку.
 * Возможность блокировать и разблокировать пользователей админу.
 * Улучшить фильтрацию списков.
+* Проверять соответствие схемы миграций и схемы метадаты.
 
 ************
 Installation
@@ -98,6 +99,8 @@ Provide path to config it in ``CYBERBOX_CONFIG_FILE`` variable (also you can cre
 .. code-block:: bash
 
     export CYBERBOX_CONFIG_FILE="$(pwd)/configs/config-dev.yaml"
+    docker-compose up -d
+    alembic -c cyberbox/migrations/alembic.ini upgrade head
     python cyberbox/dev/pre_create_data.py  # optional step
     uvicorn 'cyberbox.asgi:app' --reload
 
@@ -146,6 +149,8 @@ Cyberbox made with these tools:
 #. `encode/databases <https://www.encode.io/databases>`_ for asyncio database interaction
    (alternative to `GINO <https://python-gino.org/>`_).
 #. `aiofiles <https://github.com/Tinche/aiofiles>`_ - asyncio interface for file IO.
+#. `SqlAlchemy <https://docs.sqlalchemy.org/en/13/core/tutorial.html>`_ and
+   `Alembic <https://alembic.sqlalchemy.org/en/latest/>`_ - sql query builder and migrations.
 
 Testing:
 
