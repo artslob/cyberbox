@@ -15,6 +15,8 @@ naming_convention = {
 
 metadata = sqlalchemy.MetaData(naming_convention=naming_convention)
 
+CASCADE = "CASCADE"
+
 User = sqlalchemy.Table(
     "user",
     metadata,
@@ -23,30 +25,40 @@ User = sqlalchemy.Table(
     Column("disabled", Boolean(), nullable=False, default=False, server_default=expression.false()),
     Column("hashed_password", String(), nullable=False),
     Column("is_admin", Boolean(), server_default=expression.false(), nullable=False),
-    Column("created", TIMESTAMP(timezone=True), nullable=False),
+    Column("created", TIMESTAMP(timezone=True), nullable=False, index=True),
 )
 
 File = sqlalchemy.Table(
     "file",
     metadata,
     Column("uid", UUID(), primary_key=True),
-    Column("owner", String(), ForeignKey(User.c.username), nullable=False),
+    Column(
+        "owner",
+        String(),
+        ForeignKey(User.c.username, onupdate=CASCADE, ondelete=CASCADE),
+        nullable=False,
+        index=True,
+    ),
     Column("filename", String(), nullable=False),
     Column("content_type", String(), nullable=False),
-    Column("created", TIMESTAMP(timezone=True), nullable=False),
+    Column("created", TIMESTAMP(timezone=True), nullable=False, index=True),
 )
 
 Link = sqlalchemy.Table(
     "link",
     metadata,
-    Column("uid", UUID(), ForeignKey(File.c.uid)),
-    Column("link", String(), unique=True, nullable=False),
+    Column(
+        "uid",
+        UUID(),
+        ForeignKey(File.c.uid, onupdate=CASCADE, ondelete=CASCADE),
+        nullable=False,
+        index=True,
+    ),
+    Column("link", String(), primary_key=True),
     Column(
         "is_onetime", Boolean(), default=False, server_default=expression.false(), nullable=False
     ),
-    Column("created", TIMESTAMP(timezone=True), nullable=False),
+    Column("created", TIMESTAMP(timezone=True), nullable=False, index=True),
     Column("visited_count", Integer(), default=0, server_default="0", nullable=False),
     Column("valid_until", TIMESTAMP(timezone=True), nullable=True),
 )
-
-# TODO set on_delete on_update
