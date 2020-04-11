@@ -1,6 +1,6 @@
 import jwt
 from databases import Database
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordBearer
 from jwt import PyJWTError
 from starlette.requests import Request
@@ -8,7 +8,7 @@ from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.models import UserModel
+from cyberbox.models import FilterParams, UserModel
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -44,3 +44,9 @@ async def get_current_user(
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
 
     return user
+
+
+async def get_filter_params(
+    page: int = Query(1, alias="_page", ge=1), limit: int = Query(20, alias="_limit", ge=1, le=500)
+) -> FilterParams:
+    return FilterParams(page=page, limit=limit)

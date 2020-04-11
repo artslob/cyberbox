@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import Generic, List, Optional, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from pydantic.generics import GenericModel
 
 
 class TokenModel(BaseModel):
@@ -32,3 +34,24 @@ class LinkModel(BaseModel):
     created: datetime
     visited_count: int
     valid_until: datetime = None
+
+
+DataT = TypeVar("DataT")
+
+
+class Page(GenericModel, Generic[DataT]):
+    items: List[DataT]
+    total: int
+    pages: int
+    has_next: bool
+    has_previous: bool
+    next_page_number: Optional[bool]
+    previous_page_number: Optional[bool]
+
+
+class FilterParams(BaseModel):
+    page: int = Field(..., ge=1)
+    limit: int = Field(..., ge=1)
+
+    def offset(self) -> int:
+        return (self.page - 1) * self.limit
