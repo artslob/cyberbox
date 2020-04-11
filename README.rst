@@ -19,6 +19,10 @@ Cyberbox - REST API для  файлохранилища с возможност
 
 * Alembic: ORM миграции.
 
+Администрирование:
+
+* Создание админа через коммандную оболочку.
+
 Аутентификация:
 
 * Регистрация пользователей. Пользователи по умолчанию создаются заблокированными.
@@ -46,7 +50,6 @@ Cyberbox - REST API для  файлохранилища с возможност
 Реализовать
 ===========
 
-* Создание админа через коммандную оболочку.
 * Возможность блокировать и разблокировать пользователей админу.
 * Проверять соответствие схемы миграций и схемы метадаты.
 * Версионирование по git тегам.
@@ -105,6 +108,21 @@ Provide path to config it in ``CYBERBOX_CONFIG_FILE`` variable (also you can cre
     uvicorn 'cyberbox.asgi:app' --reload
 
 Then go to http://127.0.0.1:8000/docs or http://127.0.0.1:8000/redoc.
+
+***
+CLI
+***
+
+Package should be installed to run cli. For usage info run ``cyberbox --help``. Cli can be invoked
+by ``cyberbox`` or ``python -m cyberbox``.
+
+To create superuser run following command:
+
+.. code-block:: bash
+
+    cyberbox create-admin --username "admin_username"
+    # or alternative approach:
+    python -m cyberbox
 
 *******
 Testing
