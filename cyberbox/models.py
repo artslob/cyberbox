@@ -45,8 +45,8 @@ class Page(GenericModel, Generic[DataT]):
     pages: int
     has_next: bool
     has_previous: bool
-    next_page_number: Optional[bool]
-    previous_page_number: Optional[bool]
+    next_page_number: Optional[int]
+    previous_page_number: Optional[int]
 
 
 class FilterParams(BaseModel):
