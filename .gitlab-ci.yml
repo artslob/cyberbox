@@ -1,7 +1,6 @@
 image: 'registry.gitlab.com/artslob/cyberbox/ci-image:latest'
 
 before_script:
-  - source /ci-image/venv/bin/activate
   - pip list
   - poetry -V
   - poetry install
