@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID, uuid4
 
 import aiofiles
@@ -11,19 +10,21 @@ from starlette.status import HTTP_404_NOT_FOUND
 
 from cyberbox import orm
 from cyberbox.config import Config
-from cyberbox.dependency import get_config, get_current_user, get_db
-from cyberbox.models import FileModel, UserModel
+from cyberbox.dependency import get_config, get_current_user, get_db, get_filter_params
+from cyberbox.models import FileModel, FilterParams, Page, UserModel
+from cyberbox.pagination import pagination
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[FileModel])
+@router.get("/", response_model=Page[FileModel])
 async def file_list(
-    user: UserModel = Depends(get_current_user), db: Database = Depends(get_db),
+    user: UserModel = Depends(get_current_user),
+    db: Database = Depends(get_db),
+    params: FilterParams = Depends(get_filter_params),
 ):
-    # TODO improve filter
-    query = orm.File.select().where(orm.File.c.owner == user.username).limit(10)
-    return await db.fetch_all(query)
+    query = orm.File.select().where(orm.File.c.owner == user.username)
+    return await pagination(query, orm.File, Page[FileModel], db, params)
 
 
 @router.post("/upload", response_model=FileModel)

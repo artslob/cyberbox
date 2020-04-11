@@ -82,10 +82,13 @@ async def test_file_upload_with_file_factory(
     assert response.status_code == 200
 
     file_list = response.json()
-    assert isinstance(file_list, list)
-    assert len(file_list) == 1
+    assert isinstance(file_list, dict)
+    assert len(file_list) == 7
+    assert len(file_list["items"]) == 1
     check_file_response_model(
-        file_list[0], expected_name=expected_name, expected_content_type=expected_content_type
+        file_list["items"][0],
+        expected_name=expected_name,
+        expected_content_type=expected_content_type,
     )
 
 
@@ -104,9 +107,10 @@ async def test_file_list(logged_user, upload_file: dict, client: AsyncClient):
     assert response.status_code == 200
 
     file_list = response.json()
-    assert isinstance(file_list, list)
-    assert len(file_list) == 1
-    check_file_response_model(file_list[0])
+    assert isinstance(file_list, dict)
+    assert len(file_list) == 7
+    assert len(file_list["items"]) == 1
+    check_file_response_model(file_list["items"][0])
 
 
 @pytest.mark.asyncio
