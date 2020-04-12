@@ -3,8 +3,8 @@ from databases import Database
 from fastapi import Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordBearer
 from jwt import PyJWTError
+from starlette import status
 from starlette.requests import Request
-from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN
 
 from cyberbox import orm
 from cyberbox.config import Config
@@ -31,17 +31,22 @@ async def get_current_user(
     try:
         payload = jwt.decode(token, cfg.jwt.secret_key, algorithms=[cfg.jwt.algorithm])
     except PyJWTError:
-        raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate access token"
-        )
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Could not validate access token")
 
     row = await db.fetch_one(orm.User.select().where(orm.User.c.username == payload.get("sub")))
     if row is None:
-        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="User does not exist")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User does not exist")
 
     user = UserModel.parse_obj(row)
     if user.disabled:
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="User is disabled")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "User is disabled")
+
+    return user
+
+
+async def get_admin_user(user: UserModel = Depends(get_current_user)):
+    if not user.is_admin:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "you must be admin to access this endpoint")
 
     return user
 

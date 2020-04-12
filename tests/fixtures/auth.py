@@ -19,12 +19,13 @@ async def create_users(db: Database):
             disabled=disabled,
             hashed_password=hashed_password,
             created=arrow.utcnow().datetime,
-            is_admin=False,
+            is_admin=is_admin,
         )
-        for username, disabled in [
-            ("test_user", False),
-            ("disabled_user", True),
-            ("active_user", False),
+        for username, disabled, is_admin in [
+            ("test_user", False, False),
+            ("disabled_user", True, False),
+            ("active_user", False, False),
+            ("admin_user", False, True),
         ]
     ]
     await db.execute_many(orm.User.insert(), values)
@@ -61,3 +62,8 @@ async def active_user(create_users, client: AsyncClient):
 @pytest.fixture()
 async def disabled_user(create_users, client: AsyncClient):
     return await login_as("disabled_user", client)
+
+
+@pytest.fixture()
+async def admin_user(create_users, client: AsyncClient):
+    return await login_as("admin_user", client)
