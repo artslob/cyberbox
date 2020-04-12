@@ -1,6 +1,11 @@
+from uuid import uuid4
+
 import pytest
+from databases import Database
 from httpx import AsyncClient
 from starlette import status
+
+from cyberbox import orm
 
 
 @pytest.mark.asyncio
@@ -41,3 +46,35 @@ async def test_admin_user_user_list(client: AsyncClient, admin_user):
         "previous_page_number": None,
         "total": 4,
     }
+
+
+@pytest.mark.asyncio
+async def test_user_update(client: AsyncClient, admin_user, logged_user, db: Database):
+    """ Check admin can change attributes of users. """
+    logged_username, _, _ = logged_user
+    username, access_token, headers = admin_user
+
+    query = orm.User.select().where(orm.User.c.username == logged_username)
+    logged_uid = (await db.fetch_one(query))["uid"]
+
+    json = dict(is_admin=True, disabled=True)
+    response = await client.put(f"/admin/user/{logged_uid}", headers=headers, json=json)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() is None
+
+    query = (
+        orm.User.select()
+        .where(orm.User.c.username == logged_username)
+        .where(orm.User.c.is_admin.is_(True))
+        .where(orm.User.c.disabled.is_(True))
+    )
+    assert (await db.fetch_one(query))["uid"] == logged_uid
+
+
+@pytest.mark.asyncio
+async def test_user_update_404(client: AsyncClient, admin_user):
+    username, access_token, headers = admin_user
+
+    json = dict(is_admin=True, disabled=True)
+    response = await client.put(f"/admin/user/{uuid4()}", headers=headers, json=json)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
