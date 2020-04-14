@@ -3,7 +3,6 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from cyberbox.asgi import app
 from cyberbox.orm import metadata
 
 # this is the Alembic Config object, which provides
@@ -12,16 +11,15 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)
+if config.config_file_name:
+    fileConfig(config.config_file_name)
 
 # add your model's MetaData object here for 'autogenerate' support
 target_metadata = metadata
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
+# other values from the config, defined by the needs of env.py, can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
-# ... etc.
-config.set_main_option("sqlalchemy.url", app.state.cfg.database.url)
+# config.set_main_option("sqlalchemy.url", app.state.cfg.database.url)
 
 
 def run_migrations_offline():

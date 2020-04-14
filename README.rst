@@ -92,6 +92,12 @@ no need to call ``poetry run`` every time.
 Running backend
 ***************
 
+Create copy of ``alembic`` config and override default values:
+
+.. code-block:: bash
+
+    cp cyberbox/migrations/alembic.example.ini cyberbox/migrations/alembic.ini
+
 Create config file. Example is ``configs/config-dev-example.yaml``. Validation can be found in
 ``cyberbox/config.py`` file.
 

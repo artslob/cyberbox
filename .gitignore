@@ -16,3 +16,4 @@ build/
 
 export-vars.sh
 /configs/*.y[a]ml
+/cyberbox/migrations/*.ini

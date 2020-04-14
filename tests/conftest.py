@@ -8,10 +8,9 @@ from asgi_lifespan import LifespanManager
 
 from cyberbox import const, orm
 from cyberbox.app import create_app
+from cyberbox.const import CYBERBOX_TEST_DB_URL
 
 pytest_plugins = ["tests.fixtures.auth", "tests.fixtures.data", "tests.fixtures.files"]
-
-CYBERBOX_TEST_DB_URL = "CYBERBOX_TEST_DB_URL"
 
 
 @pytest.fixture(scope="session")

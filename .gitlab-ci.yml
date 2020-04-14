@@ -18,6 +18,18 @@ tests:
   script:
     - pytest --color=yes
 
+upgrade-downgrade-db:
+  services:
+    - name: postgres:12.2
+      alias: db
+  variables:
+    POSTGRES_PASSWORD: testpass
+    POSTGRES_USER: testuser
+    POSTGRES_DB: cyberbox-test
+    CYBERBOX_TEST_DB_URL: "postgresql://testuser:testpass@db:5432/cyberbox-test"
+  script:
+    - python .ci/upgrade_and_downgrade_db.py
+
 code-style:
   script:
     - black --check .
