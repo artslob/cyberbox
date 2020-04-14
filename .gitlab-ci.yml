@@ -8,7 +8,7 @@ before_script:
 
 tests:
   services:
-    - name: postgres:12.2
+    - name: postgres:10.12
       alias: db
   variables:
     POSTGRES_PASSWORD: testpass
@@ -20,7 +20,7 @@ tests:
 
 upgrade-downgrade-db:
   services:
-    - name: postgres:12.2
+    - name: postgres:10.12
       alias: db
   variables:
     POSTGRES_PASSWORD: testpass
@@ -29,6 +29,21 @@ upgrade-downgrade-db:
     CYBERBOX_TEST_DB_URL: "postgresql://testuser:testpass@db:5432/cyberbox-test"
   script:
     - python .ci/upgrade_and_downgrade_db.py
+
+compare-migrations-metadata:
+  services:
+    - name: postgres:10.12
+      alias: db
+  variables:
+    POSTGRES_PASSWORD: testpass
+    POSTGRES_USER: testuser
+    POSTGRES_DB: cyberbox-test
+    CYBERBOX_TEST_DB_URL: "postgresql://testuser:testpass@db:5432/cyberbox-test"
+  script:
+    - psql --version
+    - ./.ci/make_dump.sh meta > meta
+    - ./.ci/make_dump.sh migration > migration
+    - diff --color=always migration meta
 
 code-style:
   script:

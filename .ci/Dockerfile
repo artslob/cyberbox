@@ -1,5 +1,7 @@
 FROM python:3.7.4-buster
 
+RUN apt-get update && apt-get install -y postgresql-client
+
 ENV CI_POETRY_URL="https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py" \
     PATH="/root/.poetry/bin:${PATH}" \
     PYTHONFAULTHANDLER=1 \

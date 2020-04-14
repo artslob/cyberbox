@@ -3,7 +3,7 @@ version: '3.7'
 services:
 
   db:
-    image: 'postgres:12.2'
+    image: 'postgres:10.12'
     ports:
       - '5432:5432'
     environment:
@@ -13,7 +13,7 @@ services:
     restart: always
 
   test-db:
-    image: 'postgres:12.2'
+    image: 'postgres:10.12'
     ports:
       - '6432:5432'
     environment:
