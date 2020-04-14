@@ -49,7 +49,4 @@ code-style:
   script:
     - black --check .
     - isort -rc --check-only .
-
-flake8:
-  script:
     - flake8 .
