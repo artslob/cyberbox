@@ -1,0 +1,6 @@
+[run]
+source = cyberbox
+
+[report]
+omit =
+    cyberbox/migrations/*

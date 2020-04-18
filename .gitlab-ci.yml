@@ -16,7 +16,8 @@ tests:
     POSTGRES_DB: cyberbox-test
     CYBERBOX_TEST_DB_URL: "postgresql://testuser:testpass@db:5432/cyberbox-test"
   script:
-    - pytest --color=yes
+    - coverage run -m pytest --color=yes
+    - coverage report
 
 upgrade-downgrade-db:
   services:
