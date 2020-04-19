@@ -889,6 +889,17 @@ python-versions = "*"
 version = "1.6.1"
 
 [[package]]
+category = "dev"
+description = "the blessed package to manage your versions by scm tags"
+name = "setuptools-scm"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "3.5.0"
+
+[package.extras]
+toml = ["toml"]
+
+[[package]]
 category = "main"
 description = "Python 2 and 3 compatibility utilities"
 name = "six"
@@ -1062,7 +1073,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools"]
 
 [metadata]
-content-hash = "e29a1d4388ca579145038bf00abb44f3b96588ac0076219e2703f97870e83cb6"
+content-hash = "b438923e89f6bc25d5f61900c2001ea5ed51060efd6e3b780c74ec7e079497b2"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1550,6 +1561,15 @@ rfc3986 = [
 rx = [
     {file = "Rx-1.6.1-py2.py3-none-any.whl", hash = "sha256:7357592bc7e881a95e0c2013b73326f704953301ab551fbc8133a6fadab84105"},
     {file = "Rx-1.6.1.tar.gz", hash = "sha256:13a1d8d9e252625c173dc795471e614eadfe1cf40ffc684e08b8fff0d9748c23"},
+]
+setuptools-scm = [
+    {file = "setuptools_scm-3.5.0-py2.7.egg", hash = "sha256:fa6511072840d7eaad3ea36cc8849f437fefd85b32499a7f6026cba16ebbf63a"},
+    {file = "setuptools_scm-3.5.0-py2.py3-none-any.whl", hash = "sha256:0d23db3d43e0a43eb7196bcf0eb8a4a2eb0561f621ed7ec44b2fdccfd907e38f"},
+    {file = "setuptools_scm-3.5.0-py3.5.egg", hash = "sha256:783c143363091d3cc0d94766a9a14cdfc7ba8d29741004b6fa806ada7a8bf211"},
+    {file = "setuptools_scm-3.5.0-py3.6.egg", hash = "sha256:0a376ca6f48dfe35d2c2bba246751830247b145aec7b7fb81a52091d04226ce2"},
+    {file = "setuptools_scm-3.5.0-py3.7.egg", hash = "sha256:8a8b4109ee1a114f9ee8f7a83836284cb6429d481bd93daf64908a3d64c7c56e"},
+    {file = "setuptools_scm-3.5.0-py3.8.egg", hash = "sha256:e39c234058c25b529739c516651cde028960812ea4a35ee31ab623e9a62b10c8"},
+    {file = "setuptools_scm-3.5.0.tar.gz", hash = "sha256:5bdf21a05792903cafe7ae0c9501182ab52497614fa6b1750d9dbae7b60c1a87"},
 ]
 six = [
     {file = "six-1.14.0-py2.py3-none-any.whl", hash = "sha256:8f3cd2e254d8f793e7f3d6d9df77b92252b52637291d0f0da013c76ea2724b6c"},
