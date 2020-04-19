@@ -11,10 +11,13 @@ About
 
 Cyberbox - REST API для  файлохранилища с возможностью создавать ссылки на файлы.
 
-.. raw:: html
+.. image:: https://gitlab.com/artslob/cyberbox/badges/master/pipeline.svg
+    :target: https://gitlab.com/artslob/cyberbox/-/commits/master
+    :alt: pipeline status
 
-    <a href="https://gitlab.com/artslob/cyberbox/-/commits/master"><img alt="pipeline status" src="https://gitlab.com/artslob/cyberbox/badges/master/pipeline.svg" /></a>
-    <a href="https://gitlab.com/artslob/cyberbox/-/commits/master"><img alt="coverage report" src="https://gitlab.com/artslob/cyberbox/badges/master/coverage.svg" /></a>
+.. image:: https://gitlab.com/artslob/cyberbox/badges/master/coverage.svg
+    :target: https://gitlab.com/artslob/cyberbox/-/commits/master
+    :alt: coverage report
 
 ===========
 Реализовано
