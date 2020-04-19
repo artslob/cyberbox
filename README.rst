@@ -107,13 +107,15 @@ Do **not forget to change secret** key! Use following command to generate new on
 
     openssl rand -hex 32
 
-Mandatory steps:
+Running service in docker:
 
 .. code-block:: bash
 
     docker-compose up -d --build
     docker-compose exec cyberbox alembic -c cyberbox/migrations/alembic-docker.ini upgrade head
     docker-compose exec cyberbox python cyberbox/dev/pre_create_data.py
+    # optional: execute test script to show service capabilities
+    docker-compose exec cyberbox python cyberbox/dev/demonstrate-capabilities.py
 
 You can now access http://127.0.0.1:9000/docs or http://127.0.0.1:9000/redoc.
 
