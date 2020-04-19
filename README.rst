@@ -97,23 +97,32 @@ Create copy of ``alembic`` config and override default values:
 .. code-block:: bash
 
     cp cyberbox/migrations/alembic.example.ini cyberbox/migrations/alembic.ini
+    cp cyberbox/migrations/alembic.example.ini cyberbox/migrations/alembic-docker.ini
 
-Create config file. Example is ``configs/config-dev-example.yaml``. Validation can be found in
+Create config file for local development (``config-dev.yaml``) and for docker
+(``config-docker.yaml``). Examples is in ``configs`` dir. Validation can be found in
 ``cyberbox/config.py`` file.
 
 Do **not forget to change secret** key! Use following command to generate new one::
 
     openssl rand -hex 32
 
-Provide path to config it in ``CYBERBOX_CONFIG_FILE`` variable (also you can create copy of
-``export-vars-example.sh`` and source it):
+Mandatory steps:
+
+.. code-block:: bash
+
+    docker-compose up -d --build
+    docker-compose exec cyberbox alembic -c cyberbox/migrations/alembic-docker.ini upgrade head
+    docker-compose exec cyberbox python cyberbox/dev/pre_create_data.py
+
+You can now access http://127.0.0.1:9000/docs or http://127.0.0.1:9000/redoc.
+
+To run locally provide path to config it in ``CYBERBOX_CONFIG_FILE`` environment variable
+(also you can create copy of ``export-vars-example.sh`` and source it):
 
 .. code-block:: bash
 
     export CYBERBOX_CONFIG_FILE="$(pwd)/configs/config-dev.yaml"
-    docker-compose up -d
-    alembic -c cyberbox/migrations/alembic.ini upgrade head
-    python cyberbox/dev/pre_create_data.py  # optional step
     uvicorn 'cyberbox.asgi:app' --reload
 
 Then go to http://127.0.0.1:8000/docs or http://127.0.0.1:8000/redoc.

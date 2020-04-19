@@ -2,6 +2,18 @@ version: '3.7'
 
 services:
 
+  cyberbox:
+    build: .
+    ports:
+      - 9000:8000
+    environment:
+      CYBERBOX_CONFIG_FILE: "/cyberbox/configs/config-docker.yaml"
+    volumes:
+      - .:/cyberbox
+    depends_on:
+      - db
+    restart: always
+
   db:
     image: 'postgres:10.12'
     ports:
