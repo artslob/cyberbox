@@ -63,7 +63,7 @@ async def register(
     values = dict(
         uid=uuid4(),
         username=username,
-        disabled=True,  # TODO: config param 'disabled_by_default'
+        disabled=False,  # TODO: config param 'disabled_by_default'
         hashed_password=crypt_context.hash(password1),
         created=arrow.utcnow().datetime,
         is_admin=False,
