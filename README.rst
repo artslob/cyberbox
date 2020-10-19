@@ -167,6 +167,13 @@ Also you can install gitlab-runner locally and use it:
     # gitlab-runner exec <executor> <job-name>
     gitlab-runner exec docker tests
 
+For load tests:
+
+.. code-block:: bash
+
+    gunicorn -w 10 -k uvicorn.workers.UvicornWorker 'cyberbox.asgi:app'
+    locust -f tests/load_testing/script.py --host http://127.1:8000 -u 100 -r 5
+
 ****************************
 Building docker image for CI
 ****************************

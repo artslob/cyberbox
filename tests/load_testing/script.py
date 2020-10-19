@@ -1,11 +1,21 @@
 import random
 import string
+from time import sleep
 
-from locust import HttpUser, constant_pacing, task
+from locust import HttpUser, between, constant_pacing, task
+
+
+class PingUser(HttpUser):
+    wait_time = constant_pacing(0.5)
+
+    @task
+    def ping(self):
+        self.client.get("/common/ping/")
 
 
 class User(HttpUser):
     wait_time = constant_pacing(1)
+    wait_before_login = between(0.3, 0.8)
 
     def on_start(self):
         username = "".join(random.choices(string.ascii_uppercase + string.digits, k=5))
@@ -13,6 +23,7 @@ class User(HttpUser):
         self.client.post(
             "/auth/register", data=dict(username=username, password1=password, password2=password)
         )
+        sleep(self.wait_before_login())
         response = self.client.post("/auth/login", data=dict(username=username, password=password))
         access_token = response.json()["access_token"]
         self.client.headers.update({"Authorization": f"Bearer {access_token}"})
