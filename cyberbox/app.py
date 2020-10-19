@@ -3,7 +3,7 @@ from fastapi import Depends, FastAPI
 
 from cyberbox.config import parse_config
 from cyberbox.dependency import get_admin_user, get_current_user
-from cyberbox.routes import admin, auth, files, links
+from cyberbox.routes import admin, auth, common, files, links
 
 
 def create_app() -> FastAPI:
@@ -12,7 +12,9 @@ def create_app() -> FastAPI:
     config = parse_config()
     app.state.cfg = config
 
-    database = Database(config.database.url, force_rollback=config.database.force_rollback)
+    database = Database(
+        config.database.url, min_size=5, max_size=5, force_rollback=config.database.force_rollback
+    )
     app.state.db = database
 
     @app.on_event("startup")
@@ -23,6 +25,7 @@ def create_app() -> FastAPI:
     async def shutdown():
         await database.disconnect()
 
+    app.include_router(common.router, prefix="/common", tags=["common"])
     app.include_router(
         admin.router, prefix="/admin", tags=["admin"], dependencies=[Depends(get_admin_user)]
     )
