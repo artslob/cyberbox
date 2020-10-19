@@ -101,6 +101,7 @@ Create copy of ``alembic`` config and override default values:
 
     cp cyberbox/migrations/alembic.example.ini cyberbox/migrations/alembic.ini
     cp cyberbox/migrations/alembic.example.ini cyberbox/migrations/alembic-docker.ini
+    ln -s cyberbox/migrations/alembic.ini
 
 Create config file for local development (``config-dev.yaml``) and for docker
 (``config-docker.yaml``). Examples is in ``configs`` dir. Validation can be found in

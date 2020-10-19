@@ -1,3 +1,4 @@
-CYBERBOX_CONFIG_FILE="$(pwd)/configs/config-dev.yaml"
-export CYBERBOX_CONFIG_FILE
+#!/usr/bin/env bash
+
+export CYBERBOX_CONFIG_FILE="$(pwd)/configs/config-dev.yaml"
 export CYBERBOX_TEST_DB_URL="postgresql://testuser:testpass@localhost:6432/cyberbox-test"
