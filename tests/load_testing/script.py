@@ -2,10 +2,11 @@ import random
 import string
 from time import sleep
 
-from locust import HttpUser, between, constant_pacing, task
+from locust import between, constant_pacing, task
+from locust.contrib.fasthttp import FastHttpUser
 
 
-class PingUser(HttpUser):
+class PingUser(FastHttpUser):
     wait_time = constant_pacing(0.5)
 
     @task
@@ -13,9 +14,13 @@ class PingUser(HttpUser):
         self.client.get("/common/ping/")
 
 
-class User(HttpUser):
-    wait_time = constant_pacing(1)
+class User(FastHttpUser):
+    wait_time = constant_pacing(0.5)
     wait_before_login = between(0.3, 0.8)
+
+    def __init__(self, environment):
+        super().__init__(environment)
+        self.headers = {}
 
     def on_start(self):
         username = "".join(random.choices(string.ascii_uppercase + string.digits, k=5))
@@ -26,23 +31,23 @@ class User(HttpUser):
         sleep(self.wait_before_login())
         response = self.client.post("/auth/login", data=dict(username=username, password=password))
         access_token = response.json()["access_token"]
-        self.client.headers.update({"Authorization": f"Bearer {access_token}"})
+        self.headers.update({"Authorization": f"Bearer {access_token}"})
 
     @task
     def file_list(self):
-        self.client.get("/file/")
+        self.client.get("/file/", headers=self.headers)
 
     @task
     def link_list(self):
-        self.client.get("/link/")
+        self.client.get("/link/", headers=self.headers)
 
     @task
     def profile(self):
-        self.client.get("/auth/profile")
+        self.client.get("/auth/profile", headers=self.headers)
 
 
-class NotAuthenticatedUser(HttpUser):
-    wait_time = constant_pacing(1)
+class NotAuthenticatedUser(FastHttpUser):
+    wait_time = constant_pacing(0.5)
 
     @task
     def profile(self):
